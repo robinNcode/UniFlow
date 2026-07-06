@@ -1,0 +1,58 @@
+{
+  "common": {
+    "appName": "ইউনিফ্লো",
+    "loading": "লোড হচ্ছে...",
+    "error": "কিছু একটা সমস্যা হয়েছে",
+    "retry": "আবার চেষ্টা করুন",
+    "save": "সংরক্ষণ",
+    "cancel": "বাতিল",
+    "submit": "জমা দিন",
+    "back": "পেছনে",
+    "next": "পরবর্তী",
+    "close": "বন্ধ",
+    "search": "অনুসন্ধান",
+    "noResults": "কোনো ফলাফল পাওয়া যায়নি",
+    "required": "এই ক্ষেত্রটি আবশ্যক",
+    "connectionIssue": "সংযোগ সমস্যা — তথ্য পুরনো হতে পারে",
+    "updated": "{{time}} আগে আপডেট হয়েছে",
+    "live": "লাইভ"
+  },
+  "auth": {
+    "login": {
+      "title": "স্বাগতম",
+      "subtitle": "আপনার ইউনিফ্লো অ্যাকাউন্টে সাইন ইন করুন",
+      "phone": "ফোন নম্বর",
+      "phonePlaceholder": "+৮৮০ ১XXXXXXXXX",
+      "password": "পাসওয়ার্ড",
+      "passwordPlaceholder": "আপনার পাসওয়ার্ড লিখুন",
+      "cta": "সাইন ইন",
+      "noAccount": "অ্যাকাউন্ট নেই?",
+      "register": "অ্যাকাউন্ট তৈরি করুন"
+    },
+    "register": {
+      "title": "অ্যাকাউন্ট তৈরি করুন",
+      "subtitle": "আপনার বিশ্ববিদ্যালয় ভর্তি যাত্রা শুরু করুন",
+      "fullName": "পূর্ণ নাম",
+      "fullNamePlaceholder": "আপনার পূর্ণ নাম লিখুন",
+      "phone": "ফোন নম্বর",
+      "phonePlaceholder": "+৮৮০ ১XXXXXXXXX",
+      "password": "পাসওয়ার্ড",
+      "passwordPlaceholder": "একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন",
+      "confirmPassword": "পাসওয়ার্ড নিশ্চিত করুন",
+      "confirmPasswordPlaceholder": "আবার পাসওয়ার্ড লিখুন",
+      "cta": "অ্যাকাউন্ট তৈরি করুন",
+      "hasAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+      "login": "সাইন ইন"
+    }
+  },
+  "nav": {
+    "dashboard": "ড্যাশবোর্ড",
+    "programs": "প্রোগ্রাম",
+    "applications": "আবেদন",
+    "meritList": "মেধা তালিকা",
+    "admitCard": "প্রবেশপত্র",
+    "notifications": "বিজ্ঞপ্তি",
+    "profile": "প্রোফাইল",
+    "logout": "সাইন আউট"
+  }
+}
