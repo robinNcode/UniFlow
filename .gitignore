@@ -5,5 +5,7 @@ backend/obj/
 backend/obj/Debug/net8.0/
 backend/obj/Release/
 
-frontend/node_modules
+frontend/node_modules/
 .vscode/
+
+uniflow-frontend/node_modules/

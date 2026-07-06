@@ -1,0 +1,124 @@
+{
+    "_comment": "Bengali translation stubs — to be populated by a Bengali translator. All keys must mirror en.json exactly.",
+    "auth": {
+        "login": "ইউনিফ্লোতে লগ ইন করুন",
+        "register": "আপনার অ্যাকাউন্ট তৈরি করুন",
+        "loginCta": "লগ ইন",
+        "registerCta": "অ্যাকাউন্ট তৈরি করুন",
+        "phone": "ফোন নম্বর",
+        "password": "পাসওয়ার্ড",
+        "fullName": "পূর্ণ নাম",
+        "email": "ইমেইল",
+        "emailOptional": "ইমেইল (ঐচ্ছিক)",
+        "studentTab": "শিক্ষার্থী",
+        "adminTab": "অ্যাডমিন",
+        "adminEmail": "অ্যাডমিন ইমেইল",
+        "noAccount": "অ্যাকাউন্ট নেই?",
+        "hasAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+        "signUpLink": "সাইন আপ করুন",
+        "loginLink": "লগ ইন করুন",
+        "logout": "লগ আউট",
+        "phonePlaceholder": "01XXXXXXXXX",
+        "phoneHint": "০১XXXXXXXXX বা +৮৮০১XXXXXXXXX ফরম্যাট গ্রহণযোগ্য।",
+        "namePlaceholder": "আপনার SSC সনদ অনুযায়ী",
+        "passwordPlaceholder": "কমপক্ষে ৮ অক্ষর",
+        "errorInvalidCredentials": "সঠিক ফোন নম্বর এবং পাসওয়ার্ড দিন।",
+        "errorInvalidAdmin": "সঠিক অ্যাডমিন ইমেইল এবং পাসওয়ার্ড দিন।"
+    },
+    "dashboard": {
+        "welcome": "স্বাগতম, {{name}}",
+        "subtitle": "{{university}} — সম্মিলিত ভর্তি চক্র {{year}}",
+        "applicationStatus": "আবেদনের অবস্থা",
+        "currentMeritRank": "বর্তমান মেধা র‍্যাংক",
+        "admissionWindowCloses": "ভর্তি উইন্ডো বন্ধ হবে",
+        "recentNotifications": "সাম্প্রতিক বিজ্ঞপ্তি",
+        "urgentBannerTitle": "আপনার আসন ধরে রাখার সময় শেষ হয়ে আসছে",
+        "urgentBannerDesc": "{{quota}} কোটায় আসন নিশ্চিত করতে পেমেন্ট সম্পন্ন করুন।",
+        "proceedToPayment": "পেমেন্টে যান"
+    },
+    "application": {
+        "title": "আবেদনের অবস্থা",
+        "formTitle": "ভর্তির জন্য আবেদন করুন",
+        "stepPersonal": "ব্যক্তিগত তথ্য",
+        "stepAcademic": "একাডেমিক ইতিহাস",
+        "stepQuota": "কোটা নির্বাচন",
+        "stepReview": "পর্যালোচনা ও জমা",
+        "submitted": "আবেদন জমা দেওয়া হয়েছে",
+        "seatReserved": "আসন সংরক্ষিত — {{quota}} কোটা",
+        "paymentVerification": "পেমেন্ট যাচাই",
+        "admissionConfirmed": "ভর্তি নিশ্চিত",
+        "pending": "অপেক্ষমান",
+        "reserveSeat": {
+            "cta": "আসন সংরক্ষণ করুন"
+        }
+    },
+    "reservation": {
+        "title": "আসন সংরক্ষণ",
+        "expiresIn": "সংরক্ষণ মেয়াদ শেষ হবে",
+        "proceedToPayment": "পেমেন্টে যান",
+        "expiredTitle": "সংরক্ষণের মেয়াদ উত্তীর্ণ — আসন মুক্ত হয়েছে",
+        "expiredDesc": "আপনার সংরক্ষিত আসনটি পুনরায় উপলব্ধ পুলে ফিরে গেছে।",
+        "tryAgain": "আবার চেষ্টা করুন",
+        "quotaExhaustedTitle": "কোটা শেষ",
+        "quotaExhaustedDesc": "এই প্রোগ্রামের {{quota}} কোটায় কোনো আসন অবশিষ্ট নেই।",
+        "filledSeatsLegend": "পূর্ণ",
+        "yourSeatLegend": "আপনার আসন",
+        "availableLegend": "উপলব্ধ"
+    },
+    "payment": {
+        "title": "পেমেন্ট",
+        "admissionFee": "ভর্তি ফি",
+        "selectMethod": "পেমেন্ট পদ্ধতি নির্বাচন করুন",
+        "payCta": "{{amount}} পরিশোধ করুন",
+        "verifying": "পেমেন্ট যাচাই করা হচ্ছে…",
+        "verifyingDesc": "এটি এক মিনিট পর্যন্ত লাগতে পারে। এই পেজটি বন্ধ করবেন না।",
+        "verified": "পেমেন্ট যাচাই সম্পন্ন",
+        "verifiedDesc": "আপনার ভর্তি নিশ্চিত হয়েছে। প্রবেশপত্র তৈরি হচ্ছে।",
+        "timeoutTitle": "প্রত্যাশার চেয়ে বেশি সময় লাগছে",
+        "timeoutDesc": "কয়েক মিনিট পরে আবার চেক করুন বা সাপোর্টের সাথে যোগাযোগ করুন।"
+    },
+    "meritList": {
+        "title": "লাইভ মেধা তালিকা",
+        "live": "লাইভ",
+        "updatedAgo": "{{seconds}} সেকেন্ড আগে আপডেট হয়েছে",
+        "rank": "র‍্যাংক",
+        "candidate": "প্রার্থী",
+        "score": "স্কোর",
+        "status": "অবস্থা",
+        "connectionIssue": "সংযোগ সমস্যা — ডেটা পুরনো হতে পারে"
+    },
+    "admitCard": {
+        "title": "প্রবেশপত্র",
+        "generating": "আপনার প্রবেশপত্র তৈরি হচ্ছে",
+        "generatingDesc": "পেমেন্ট নিশ্চিত হওয়ার পরে সাধারণত কয়েক মিনিট লাগে।",
+        "checkAgain": "আবার চেক করুন",
+        "downloadPdf": "PDF ডাউনলোড করুন",
+        "rollNo": "রোল নং {{rollNumber}}",
+        "examInfo": "পরীক্ষার তারিখ: {{date}} · {{center}}"
+    },
+    "programs": {
+        "title": "প্রোগ্রামসমূহ",
+        "applyNow": "এখন আবেদন করুন",
+        "viewDetails": "বিস্তারিত দেখুন"
+    },
+    "errors": {
+        "notFound": "পেজটি পাওয়া যায়নি",
+        "notFoundDesc": "আপনি যে পেজটি খুঁজছেন তা বিদ্যমান নেই।",
+        "sessionExpired": "সেশন মেয়াদোত্তীর্ণ",
+        "sessionExpiredDesc": "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। আবার লগ ইন করুন।",
+        "loginAgain": "আবার লগ ইন করুন",
+        "goHome": "হোমে যান",
+        "connectionIssue": "সংযোগ সমস্যা — ডেটা পুরনো হতে পারে।",
+        "generic": "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।"
+    },
+    "common": {
+        "loading": "লোড হচ্ছে…",
+        "retry": "আবার চেষ্টা করুন",
+        "cancel": "বাতিল",
+        "save": "সংরক্ষণ",
+        "next": "পরবর্তী",
+        "back": "পূর্ববর্তী",
+        "submit": "জমা দিন",
+        "close": "বন্ধ করুন"
+    }
+}

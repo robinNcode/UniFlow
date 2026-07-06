@@ -1,0 +1,123 @@
+{
+    "auth": {
+        "login": "Log in to uniFlow",
+        "register": "Create your account",
+        "loginCta": "Log In",
+        "registerCta": "Create Account",
+        "phone": "Phone Number",
+        "password": "Password",
+        "fullName": "Full Name",
+        "email": "Email",
+        "emailOptional": "Email (optional)",
+        "studentTab": "Student",
+        "adminTab": "Admin",
+        "adminEmail": "Admin Email",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?",
+        "signUpLink": "Sign up",
+        "loginLink": "Log in",
+        "logout": "Log Out",
+        "phonePlaceholder": "01XXXXXXXXX",
+        "phoneHint": "Accepts 01XXXXXXXXX or +8801XXXXXXXXX format.",
+        "namePlaceholder": "As per your SSC certificate",
+        "passwordPlaceholder": "At least 8 characters",
+        "errorInvalidCredentials": "Enter a valid phone number and password to continue.",
+        "errorInvalidAdmin": "Enter a valid admin email and password to continue."
+    },
+    "dashboard": {
+        "welcome": "Welcome back, {{name}}",
+        "subtitle": "{{university}} — Combined Admission Cycle {{year}}",
+        "applicationStatus": "Application Status",
+        "currentMeritRank": "Current Merit Rank",
+        "admissionWindowCloses": "Admission Window Closes",
+        "recentNotifications": "Recent Notifications",
+        "urgentBannerTitle": "Your seat hold expires soon",
+        "urgentBannerDesc": "Complete payment to confirm your seat under the {{quota}} quota.",
+        "proceedToPayment": "Proceed to Payment"
+    },
+    "application": {
+        "title": "Application Status",
+        "formTitle": "Apply for Admission",
+        "stepPersonal": "Personal Info",
+        "stepAcademic": "Academic History",
+        "stepQuota": "Quota Selection",
+        "stepReview": "Review & Submit",
+        "submitted": "Application Submitted",
+        "seatReserved": "Seat Reserved — {{quota}} Quota",
+        "paymentVerification": "Payment Verification",
+        "admissionConfirmed": "Admission Confirmed",
+        "pending": "Pending",
+        "reserveSeat": {
+            "cta": "Reserve Seat"
+        }
+    },
+    "reservation": {
+        "title": "Seat Reservation",
+        "expiresIn": "Reservation expires in",
+        "proceedToPayment": "Proceed to Payment",
+        "expiredTitle": "Reservation expired — seat released",
+        "expiredDesc": "Your held seat has returned to the available pool. You may attempt to reserve again if seats remain.",
+        "tryAgain": "Try Reserving Again",
+        "quotaExhaustedTitle": "Quota Exhausted",
+        "quotaExhaustedDesc": "No seats remaining in {{quota}} quota for this program.",
+        "filledSeatsLegend": "Filled",
+        "yourSeatLegend": "Your seat",
+        "availableLegend": "Available"
+    },
+    "payment": {
+        "title": "Payment",
+        "admissionFee": "Admission Fee",
+        "selectMethod": "Select payment method",
+        "payCta": "Pay {{amount}}",
+        "verifying": "Verifying your payment…",
+        "verifyingDesc": "This can take up to a minute. Do not close this page.",
+        "verified": "Payment Verified",
+        "verifiedDesc": "Your admission is now confirmed. Your admit card is being generated.",
+        "timeoutTitle": "Taking longer than expected",
+        "timeoutDesc": "Please check back in a few minutes or contact support if the issue persists."
+    },
+    "meritList": {
+        "title": "Live Merit List",
+        "live": "Live",
+        "updatedAgo": "Updated {{seconds}}s ago",
+        "rank": "Rank",
+        "candidate": "Candidate",
+        "score": "Score",
+        "status": "Status",
+        "connectionIssue": "Connection issue — data may be outdated"
+    },
+    "admitCard": {
+        "title": "Admit Card",
+        "generating": "Your admit card is being generated",
+        "generatingDesc": "This usually takes a few minutes after payment confirmation. Check back shortly.",
+        "checkAgain": "Check Again",
+        "downloadPdf": "Download PDF",
+        "rollNo": "Roll No. {{rollNumber}}",
+        "examInfo": "Exam Date: {{date}} · {{center}}"
+    },
+    "programs": {
+        "title": "Programs",
+        "applyNow": "Apply Now",
+        "viewDetails": "View Details"
+    },
+    "errors": {
+        "notFound": "Page not found",
+        "notFoundDesc": "The page you are looking for does not exist.",
+        "sessionExpired": "Session expired",
+        "sessionExpiredDesc": "Your session has expired. Please log in again.",
+        "loginAgain": "Log in again",
+        "goHome": "Go to Home",
+        "connectionIssue": "Connection issue — data may be outdated. After 3 failed attempts.",
+        "generic": "Something went wrong. Please try again."
+    },
+    "common": {
+        "loading": "Loading…",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "save": "Save",
+        "next": "Next",
+        "back": "Back",
+        "submit": "Submit",
+        "close": "Close"
+    }
+}
