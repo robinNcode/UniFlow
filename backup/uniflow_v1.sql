@@ -35,7 +35,7 @@ CREATE TABLE `admission_cycles` (
   KEY `idx_admission_cycles_active_window` (`opens_at`,`closes_at`),
   CONSTRAINT `fk_admission_cycles_program` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_cycle_dates` CHECK ((`closes_at` > `opens_at`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `admission_cycles` */
 
@@ -55,7 +55,7 @@ CREATE TABLE `admit_cards` (
   UNIQUE KEY `uq_admit_cards_application` (`application_id`),
   UNIQUE KEY `uq_admit_cards_roll_number` (`roll_number`),
   CONSTRAINT `fk_admit_cards_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `admit_cards` */
 
@@ -84,7 +84,7 @@ CREATE TABLE `applications` (
   CONSTRAINT `fk_applications_quota` FOREIGN KEY (`quota_id`) REFERENCES `seat_quotas` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `fk_applications_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `chk_merit_score_range` CHECK (((`merit_score` >= 0) and (`merit_score` <= 100)))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `applications` */
 
@@ -109,7 +109,7 @@ CREATE TABLE `notification_logs` (
   KEY `idx_notification_logs_status` (`status`),
   CONSTRAINT `fk_notification_logs_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_notification_logs_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `notification_logs` */
 
@@ -126,7 +126,7 @@ CREATE TABLE `outbox_events` (
   `processed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_outbox_events_unprocessed` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `outbox_events` */
 
@@ -145,7 +145,7 @@ CREATE TABLE `password_reset_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_password_reset_tokens_token_hash` (`token_hash`),
   KEY `idx_password_reset_tokens_subject` (`subject_type`,`subject_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `password_reset_tokens` */
 
@@ -171,7 +171,7 @@ CREATE TABLE `payments` (
   KEY `idx_payments_status` (`status`),
   CONSTRAINT `fk_payments_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `chk_payments_amount_positive` CHECK ((`amount` > 0))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `payments` */
 
@@ -192,7 +192,7 @@ CREATE TABLE `programs` (
   UNIQUE KEY `uq_programs_university_code` (`university_id`,`code`),
   KEY `idx_programs_university_id` (`university_id`),
   CONSTRAINT `fk_programs_university` FOREIGN KEY (`university_id`) REFERENCES `universities` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `programs` */
 
@@ -219,7 +219,7 @@ CREATE TABLE `refresh_tokens` (
   KEY `idx_refresh_tokens_subject` (`subject_type`,`subject_id`),
   KEY `idx_refresh_tokens_expiry` (`expires_at`),
   CONSTRAINT `fk_refresh_tokens_replaced_by` FOREIGN KEY (`replaced_by_token_id`) REFERENCES `refresh_tokens` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `refresh_tokens` */
 
@@ -239,7 +239,7 @@ CREATE TABLE `revoked_access_tokens` (
   UNIQUE KEY `uq_revoked_access_tokens_jti` (`jti`),
   KEY `idx_revoked_access_tokens_subject` (`subject_type`,`subject_id`),
   KEY `idx_revoked_access_tokens_expiry` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `revoked_access_tokens` */
 
@@ -256,7 +256,7 @@ CREATE TABLE `roles` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_roles_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `roles` */
 
@@ -278,7 +278,7 @@ CREATE TABLE `seat_quotas` (
   CONSTRAINT `fk_seat_quotas_cycle` FOREIGN KEY (`cycle_id`) REFERENCES `admission_cycles` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_seat_quotas_non_negative` CHECK (((`total_seats` >= 0) and (`filled_seats` >= 0))),
   CONSTRAINT `chk_seat_quotas_not_overfilled` CHECK ((`filled_seats` <= `total_seats`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `seat_quotas` */
 
@@ -296,7 +296,7 @@ CREATE TABLE `seat_reservations` (
   UNIQUE KEY `uq_seat_reservations_application` (`application_id`),
   KEY `idx_seat_reservations_expiry` (`expires_at`),
   CONSTRAINT `fk_seat_reservations_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `seat_reservations` */
 
@@ -319,7 +319,7 @@ CREATE TABLE `students` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_students_phone` (`phone`),
   KEY `idx_students_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `students` */
 
@@ -337,7 +337,7 @@ CREATE TABLE `universities` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_universities_short_name` (`short_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `universities` */
 
@@ -363,7 +363,7 @@ CREATE TABLE `users` (
   KEY `idx_staff_users_role_id` (`role_id`),
   CONSTRAINT `fk_staff_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `fk_staff_users_university` FOREIGN KEY (`university_id`) REFERENCES `universities` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 /*Data for the table `users` */
 

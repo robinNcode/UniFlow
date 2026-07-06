@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj": {}
+    "E:\\dotnet_works\\UniFlow\\backend\\backend.csproj": {}
   },
   "projects": {
-    "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj": {
+    "E:\\dotnet_works\\UniFlow\\backend\\backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj",
+        "projectUniqueName": "E:\\dotnet_works\\UniFlow\\backend\\backend.csproj",
         "projectName": "backend",
-        "projectPath": "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj",
-        "packagesPath": "/home/robin/.nuget/packages/",
-        "outputPath": "/home/robin/Dotnet_works/UniFlow/backend/obj/",
+        "projectPath": "E:\\dotnet_works\\UniFlow\\backend\\backend.csproj",
+        "packagesPath": "C:\\Users\\VPN Technology\\.nuget\\packages\\",
+        "outputPath": "E:\\dotnet_works\\UniFlow\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/robin/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\VPN Technology\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -24,6 +24,7 @@
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -32,10 +33,17 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "FluentValidation": {
@@ -63,6 +71,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.19.1, )"
             }
           },
           "imports": [
@@ -76,6 +88,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.28, 8.0.28]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.28, 8.0.28]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.28, 8.0.28]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.28, 8.0.28]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -84,7 +114,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.128/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

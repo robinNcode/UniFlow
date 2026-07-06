@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Uniflow")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4031e9211f7875f7ff846249712223e0faee5e68")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ab8ec3454102f9d0dc1f8905144dbb45cad2ba2")]
 [assembly: System.Reflection.AssemblyProductAttribute("Uniflow")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Uniflow")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
