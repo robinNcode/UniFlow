@@ -1,0 +1,4 @@
+# Build folders and files
+build/
+backend/bin/
+backend/obj/

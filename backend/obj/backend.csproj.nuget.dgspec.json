@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/robin/Dotnet_works/uamp/backend/backend.csproj": {}
+    "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj": {}
   },
   "projects": {
-    "/home/robin/Dotnet_works/uamp/backend/backend.csproj": {
+    "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/robin/Dotnet_works/uamp/backend/backend.csproj",
+        "projectUniqueName": "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj",
         "projectName": "backend",
-        "projectPath": "/home/robin/Dotnet_works/uamp/backend/backend.csproj",
+        "projectPath": "/home/robin/Dotnet_works/UniFlow/backend/backend.csproj",
         "packagesPath": "/home/robin/.nuget/packages/",
-        "outputPath": "/home/robin/Dotnet_works/uamp/backend/obj/",
+        "outputPath": "/home/robin/Dotnet_works/UniFlow/backend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/robin/.nuget/NuGet/NuGet.Config"
