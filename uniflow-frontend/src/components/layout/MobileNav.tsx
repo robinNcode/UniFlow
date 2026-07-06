@@ -1,50 +1,46 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import {
-  LayoutDashboard,
-  GraduationCap,
-  FileText,
-  Trophy,
-  Bell,
-} from 'lucide-react';
+import { LayoutDashboard, GraduationCap, FileText, Trophy, Bell, CreditCard } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
-const mobileNavItems = [
-  { key: 'dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { key: 'programs', path: '/programs', icon: GraduationCap },
-  { key: 'applications', path: '/applications', icon: FileText },
-  { key: 'meritList', path: '/merit-list', icon: Trophy },
-  { key: 'notifications', path: '/notifications', icon: Bell },
+const STUDENT_MOBILE_NAV = [
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+  { path: '/programs', icon: GraduationCap, label: 'Programs' },
+  { path: '/applications', icon: FileText, label: 'Apply' },
+  { path: '/merit-list', icon: Trophy, label: 'Rankings' },
+  { path: '/notifications', icon: Bell, label: 'Alerts' },
+];
+
+const ADMIN_MOBILE_NAV = [
+  { path: '/admin', icon: LayoutDashboard, label: 'Overview' },
+  { path: '/admin/applications', icon: FileText, label: 'Apps' },
+  { path: '/admin/quotas', icon: GraduationCap, label: 'Quotas' },
+  { path: '/admin/payments', icon: CreditCard, label: 'Payments' },
+  { path: '/admin/merit-list', icon: Trophy, label: 'Merit' },
 ];
 
 export default function MobileNav() {
-  const { t } = useTranslation();
   const location = useLocation();
+  const { user } = useAuth();
+  
+  const navItems = user?.role === 'admin' ? ADMIN_MOBILE_NAV : STUDENT_MOBILE_NAV;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-border">
-      <div className="flex items-center justify-around py-2 px-1">
-        {mobileNavItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.path);
-          const Icon = item.icon;
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border shadow-lg">
+      <div className="flex items-stretch h-16">
+        {navItems.map(({ path, icon: Icon, label }) => {
+          const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
           return (
             <Link
-              key={item.key}
-              to={item.path}
-              className={`
-                flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl min-w-[56px]
-                transition-all duration-200
-                ${isActive
-                  ? 'text-primary'
-                  : 'text-text-muted hover:text-text-secondary'
-                }
-              `}
+              key={path}
+              to={path}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors ${
+                isActive ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
+              }`}
             >
-              <Icon className={`h-5 w-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
-              <span className="text-[10px] font-medium leading-tight">
-                {t(`nav.${item.key}`)}
-              </span>
+              <Icon className={`h-5 w-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
+              <span className="text-[10px] font-medium leading-none">{label}</span>
               {isActive && (
-                <span className="absolute -top-0 w-8 h-0.5 rounded-full bg-primary" />
+                <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />
               )}
             </Link>
           );

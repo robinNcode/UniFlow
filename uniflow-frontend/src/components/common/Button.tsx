@@ -2,7 +2,7 @@ import { type ButtonHTMLAttributes, forwardRef } from 'react';
 import { Loader2 } from 'lucide-react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'accent';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -15,21 +15,22 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-white hover:bg-primary-hover active:bg-primary-dark shadow-sm hover:shadow active:shadow-none shadow-primary/20',
+    'bg-primary text-white hover:bg-primary/90 shadow shadow-primary/20',
   secondary:
-    'bg-white text-text-primary border border-border/80 hover:bg-slate-50 hover:border-border active:bg-slate-100 shadow-sm',
+    'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 hover:text-slate-900 shadow-sm',
   ghost:
-    'bg-transparent text-text-secondary hover:bg-slate-50 hover:text-text-primary active:bg-slate-100',
+    'bg-transparent text-slate-700 hover:bg-slate-100 hover:text-slate-900',
   danger:
-    'bg-danger text-white hover:bg-[#D93838] active:bg-[#B32D2D] shadow-sm hover:shadow active:shadow-none shadow-danger/20',
+    'bg-danger text-white hover:bg-danger/90 shadow-sm shadow-danger/20',
   accent:
-    'bg-accent text-white hover:bg-[#E69500] active:bg-[#CC8400] shadow-sm hover:shadow active:shadow-none shadow-accent/20',
+    'bg-accent text-white hover:bg-accent/90 shadow-sm shadow-accent/20',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 h-9 text-xs rounded-lg',
-  md: 'px-4 py-2.5 h-10 text-sm rounded-xl',
-  lg: 'px-6 py-3 h-12 text-base rounded-2xl',
+  sm: 'h-8 px-3 text-xs rounded-md',
+  md: 'h-10 px-4 py-2 text-sm rounded-lg',
+  lg: 'h-12 px-8 text-base rounded-lg',
+  icon: 'h-9 w-9 rounded-lg flex items-center justify-center p-0',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -53,10 +54,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={`
-          inline-flex items-center justify-center gap-2 font-medium
-          transition-all duration-200 ease-out
-          focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+          inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors
+          focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary
+          disabled:pointer-events-none disabled:opacity-50
           ${variantClasses[variant]}
           ${sizeClasses[size]}
           ${fullWidth ? 'w-full' : ''}
@@ -65,7 +65,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin shrink-0" />
         ) : (
           leftIcon
         )}

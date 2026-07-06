@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>uniFlow — Admission Portal Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  // Tailwind theme extension — tokens must match the design system already
+  // defined for uniFlow (Section 3 of the frontend spec): deep teal primary,
+  // amber reserved strictly for time-sensitive states, not decorative use.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: { DEFAULT: '#0F4C5C', hover: '#0B3A47', light: '#E6EEEF' },
+          accent: { DEFAULT: '#D97706', light: '#FEF3E2' },
+          success: { DEFAULT: '#15803D', light: '#E8F5EC' },
+          danger: { DEFAULT: '#B91C1C', light: '#FBEAEA' },
+          surface: '#FFFFFF',
+          canvas: '#F8FAFC',
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; background-color: #F8FAFC; }
+  .pulse-dot { animation: pulse-live 1.6s ease-in-out infinite; }
+  @keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot { animation: none; }
+  }
+</style>
+</head>
+<body class="text-slate-900 antialiased">
+
+<!-- ============================================================
+     TOP NAV — desktop only. Mobile relies on bottom nav instead
+     to keep primary actions within thumb reach (Section 3.3).
+     ============================================================ -->
+<header class="sticky top-0 z-30 bg-surface border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/></svg>
+      </div>
+      <span class="font-bold text-lg tracking-tight">uni<span class="text-primary">Flow</span></span>
+    </div>
+
+    <!-- Authenticated nav — hidden on landing/login/register -->
+    <nav id="app-nav" class="hidden md:flex items-center gap-1 text-sm font-medium">
+      <button data-view-btn="dashboard" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Dashboard</button>
+      <button data-view-btn="application" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Application</button>
+      <button data-view-btn="reservation" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Seat Reservation</button>
+      <button data-view-btn="payment" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Payment</button>
+      <button data-view-btn="meritlist" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Merit List</button>
+      <button data-view-btn="admitcard" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Admit Card</button>
+    </nav>
+
+    <!-- Authenticated identity chip -->
+    <div id="app-identity" class="flex items-center gap-3">
+      <span class="hidden sm:block text-sm text-slate-500">Rahim Uddin</span>
+      <div class="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold">RU</div>
+      <button data-view-btn="landing" class="hidden sm:block text-xs font-medium text-slate-400 hover:text-danger ml-1">Log Out</button>
+    </div>
+
+    <!-- Public (pre-auth) actions -->
+    <div id="public-nav" class="hidden items-center gap-2">
+      <button data-view-btn="login" class="text-sm font-medium text-slate-600 hover:text-primary px-3 py-2">Log In</button>
+      <button data-view-btn="register" class="bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary-hover transition">Sign Up</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-10">
+
+  <!-- ============================================================
+       VIEW: LANDING
+       ============================================================ -->
+  <section id="view-landing" class="view space-y-16 -mt-2">
+
+    <div class="grid md:grid-cols-2 gap-10 items-center pt-6 md:pt-14">
+      <div>
+        <span class="inline-block bg-primary-light text-primary text-xs font-semibold px-3 py-1 rounded-full mb-4">Combined Admission Cycle 2026</span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          One seat. One deadline.<br class="hidden sm:block"> Zero guesswork.
+        </h1>
+        <p class="text-slate-500 mt-4 text-base leading-relaxed">
+          Apply, reserve your seat, pay, and track your live merit rank — all in one place, built to stay accurate even when thousands of applicants log in at once.
+        </p>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <button data-view-btn="register" class="bg-primary text-white font-semibold text-sm px-5 py-3 rounded-lg hover:bg-primary-hover transition">Get Started</button>
+          <button data-view-btn="login" class="bg-surface border border-slate-300 text-slate-700 font-semibold text-sm px-5 py-3 rounded-lg hover:bg-slate-50 transition">I already have an account</button>
+        </div>
+        <div class="flex items-center gap-6 mt-8 text-xs text-slate-400">
+          <span><span class="font-bold text-slate-700">4,820</span> applicants tracked live</span>
+          <span><span class="font-bold text-slate-700">37</span> partner programs</span>
+        </div>
+      </div>
+
+      <div class="bg-surface border border-slate-200 rounded-2xl p-6">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">General Quota — CSE, University of Dhaka</p>
+        <div class="grid grid-cols-10 gap-1.5 mb-4" id="hero-seat-grid"></div>
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+          <span>46 of 60 seats filled</span>
+          <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-success pulse-dot"></span>Live</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Seat Reservation</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Hold your seat under quota rules with a transparent, time-boxed reservation window.</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Live Merit List</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Track your exact rank as it updates — not a static snapshot from yesterday.</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Verified Payment</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Pay via bKash, Nagad, or Rocket with confirmation you can actually trust.</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Instant Admit Card</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Download your admit card the moment it's generated — no office visit required.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: LOGIN
+       ============================================================ -->
+  <section id="view-login" class="view">
+    <div class="max-w-md mx-auto pt-6 md:pt-14">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold">Log in to uniFlow</h1>
+        <p class="text-slate-500 text-sm mt-1">Enter your phone number and password to continue.</p>
+      </div>
+
+      <form id="login-form" class="bg-surface border border-slate-200 rounded-xl p-6 space-y-4">
+        <div>
+          <label for="login-phone" class="block text-sm font-medium mb-1.5">Phone Number</label>
+          <input id="login-phone" type="tel" placeholder="01XXXXXXXXX" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div>
+          <label for="login-password" class="block text-sm font-medium mb-1.5">Password</label>
+          <input id="login-password" type="password" placeholder="••••••••" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div id="login-error" class="hidden bg-danger-light border border-danger/20 rounded-lg px-3.5 py-2.5 text-xs text-danger font-medium"></div>
+        <button type="submit" class="w-full bg-primary text-white font-semibold text-sm py-3 rounded-lg hover:bg-primary-hover transition">Log In</button>
+      </form>
+
+      <p class="text-center text-sm text-slate-500 mt-5">
+        Don't have an account?
+        <button data-view-btn="register" class="text-primary font-semibold hover:underline">Sign up</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: REGISTER
+       ============================================================ -->
+  <section id="view-register" class="view">
+    <div class="max-w-md mx-auto pt-6 md:pt-14 pb-4">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold">Create your account</h1>
+        <p class="text-slate-500 text-sm mt-1">Takes about a minute. You'll use your phone number to log in.</p>
+      </div>
+
+      <form id="register-form" class="bg-surface border border-slate-200 rounded-xl p-6 space-y-4">
+        <div>
+          <label for="reg-name" class="block text-sm font-medium mb-1.5">Full Name</label>
+          <input id="reg-name" type="text" placeholder="As per your SSC certificate" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div>
+          <label for="reg-phone" class="block text-sm font-medium mb-1.5">Phone Number</label>
+          <input id="reg-phone" type="tel" placeholder="01XXXXXXXXX" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          <p class="text-xs text-slate-400 mt-1">Accepts 01XXXXXXXXX or +8801XXXXXXXXX format.</p>
+        </div>
+        <div>
+          <label for="reg-email" class="block text-sm font-medium mb-1.5">Email <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input id="reg-email" type="email" placeholder="you@example.com"
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div>
+          <label for="reg-password" class="block text-sm font-medium mb-1.5">Password</label>
+          <input id="reg-password" type="password" placeholder="At least 8 characters" required minlength="8"
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div id="register-error" class="hidden bg-danger-light border border-danger/20 rounded-lg px-3.5 py-2.5 text-xs text-danger font-medium"></div>
+        <button type="submit" class="w-full bg-primary text-white font-semibold text-sm py-3 rounded-lg hover:bg-primary-hover transition">Create Account</button>
+      </form>
+
+      <p class="text-center text-sm text-slate-500 mt-5">
+        Already have an account?
+        <button data-view-btn="login" class="text-primary font-semibold hover:underline">Log in</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: DASHBOARD
+       ============================================================ -->
+  <section id="view-dashboard" class="view active space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">Welcome back, Rahim</h1>
+      <p class="text-slate-500 text-sm mt-1">Dhaka University — Combined Admission Cycle 2026</p>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Application Status</p>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-accent"></span>
+          <span class="font-semibold text-sm">Seat Reserved</span>
+        </div>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Current Merit Rank</p>
+        <p class="mt-2 font-semibold text-sm">#212 <span class="text-slate-400 font-normal">of 4,820 · General</span></p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Admission Window Closes</p>
+        <p class="mt-2 font-semibold text-sm">2 days 6 hours</p>
+      </div>
+    </div>
+
+    <div class="bg-primary rounded-xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <p class="font-semibold">Your seat hold expires soon</p>
+        <p class="text-sm text-white/80">Complete payment to confirm your seat under the General quota.</p>
+      </div>
+      <button data-view-btn="payment" class="shrink-0 bg-white text-primary font-semibold text-sm px-4 py-2 rounded-lg hover:bg-slate-100">Proceed to Payment</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-4">
+      <h2 class="font-semibold text-sm mb-3">Recent Notifications</h2>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <li class="py-2.5 flex justify-between"><span>Seat reservation confirmed for CSE — General quota</span><span class="text-slate-400 text-xs shrink-0 ml-3">2m ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Application submitted successfully</span><span class="text-slate-400 text-xs shrink-0 ml-3">1h ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Merit list published for Combined Admission Cycle 2026</span><span class="text-slate-400 text-xs shrink-0 ml-3">1d ago</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: APPLICATION STATUS
+       ============================================================ -->
+  <section id="view-application" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Application Status</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <p class="font-semibold">Computer Science &amp; Engineering</p>
+          <p class="text-sm text-slate-500">University of Dhaka · Application #DU-2026-88213</p>
+        </div>
+        <span class="bg-accent-light text-accent text-xs font-semibold px-2.5 py-1 rounded-full">Seat Reserved</span>
+      </div>
+
+      <!-- Status timeline -->
+      <ol class="space-y-0">
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full bg-success flex items-center justify-center text-white text-xs">✓</div>
+            <div class="w-px flex-1 bg-success"></div>
+          </div>
+          <div class="pb-5">
+            <p class="text-sm font-medium">Application Submitted</p>
+            <p class="text-xs text-slate-400">July 2, 2026 — 11:04 AM</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full bg-success flex items-center justify-center text-white text-xs">✓</div>
+            <div class="w-px flex-1 bg-accent"></div>
+          </div>
+          <div class="pb-5">
+            <p class="text-sm font-medium">Seat Reserved — General Quota</p>
+            <p class="text-xs text-slate-400">July 6, 2026 — 10:15 AM</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+            <div class="w-px flex-1 bg-slate-200"></div>
+          </div>
+          <div class="pb-5">
+            <p class="text-sm font-medium text-slate-400">Payment Verification</p>
+            <p class="text-xs text-slate-400">Pending</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-slate-400">Admission Confirmed</p>
+            <p class="text-xs text-slate-400">Pending</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: SEAT RESERVATION — the highest-stakes screen.
+       Countdown is functional (real setInterval), not decorative.
+       ============================================================ -->
+  <section id="view-reservation" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Seat Reservation</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="font-semibold text-sm">General Quota — CSE, University of Dhaka</p>
+      </div>
+
+      <!-- Seat grid visualization — signature element: seats rendered as
+           an actual grid of squares rather than a bare progress bar, so
+           the abstraction (finite, contested seats) is visually literal. -->
+      <div class="grid grid-cols-10 gap-1.5 mb-4" id="seat-grid"></div>
+      <p class="text-xs text-slate-500 mb-5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-primary align-middle mr-1"></span>Filled &nbsp;
+        <span class="inline-block w-2.5 h-2.5 rounded-sm bg-accent align-middle mr-1"></span>Your seat &nbsp;
+        <span class="inline-block w-2.5 h-2.5 rounded-sm bg-slate-200 align-middle mr-1"></span>Available</p>
+
+      <div class="bg-accent-light border border-accent/20 rounded-lg p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-accent uppercase tracking-wide">Reservation expires in</p>
+          <p class="text-2xl font-bold text-accent tabular-nums" id="countdown-display">14:59</p>
+        </div>
+        <button id="btn-proceed-payment" data-view-btn="payment" class="bg-accent text-white font-semibold text-sm px-4 py-2.5 rounded-lg hover:opacity-90 transition">
+          Proceed to Payment
+        </button>
+      </div>
+
+      <div id="expired-banner" class="hidden mt-4 bg-danger-light border border-danger/20 rounded-lg p-4">
+        <p class="text-sm font-semibold text-danger">Reservation expired — seat released</p>
+        <p class="text-xs text-danger/80 mt-1">Your held seat has returned to the available pool. You may attempt to reserve again if seats remain.</p>
+        <button class="mt-3 bg-danger text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90">Try Reserving Again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: PAYMENT — polling-state simulation
+       ============================================================ -->
+  <section id="view-payment" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Payment</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5 space-y-5">
+      <div class="flex justify-between text-sm">
+        <span class="text-slate-500">Admission Fee</span>
+        <span class="font-semibold">৳ 2,450.00</span>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium mb-2">Select payment method</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button class="pay-method border-2 border-primary bg-primary-light rounded-lg py-3 text-xs font-semibold text-primary">bKash</button>
+          <button class="pay-method border-2 border-slate-200 rounded-lg py-3 text-xs font-semibold text-slate-500 hover:border-slate-300">Nagad</button>
+          <button class="pay-method border-2 border-slate-200 rounded-lg py-3 text-xs font-semibold text-slate-500 hover:border-slate-300">Rocket</button>
+        </div>
+      </div>
+
+      <button id="btn-initiate-payment" class="w-full bg-primary text-white font-semibold text-sm py-3 rounded-lg hover:bg-primary-hover transition">
+        Pay ৳ 2,450.00
+      </button>
+
+      <!-- Polling state -->
+      <div id="payment-polling" class="hidden bg-canvas border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+        <svg class="animate-spin h-5 w-5 text-primary shrink-0" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <div>
+          <p class="text-sm font-medium">Verifying your payment…</p>
+          <p class="text-xs text-slate-500">This can take up to a minute. Do not close this page.</p>
+        </div>
+      </div>
+
+      <div id="payment-success" class="hidden bg-success-light border border-success/20 rounded-lg p-4 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-success text-white flex items-center justify-center shrink-0">✓</div>
+        <div>
+          <p class="text-sm font-semibold text-success">Payment Verified</p>
+          <p class="text-xs text-success/80">Your admission is now confirmed. Your admit card is being generated.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: LIVE MERIT LIST
+       ============================================================ -->
+  <section id="view-meritlist" class="view space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">Live Merit List</h1>
+      <div class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-2 h-2 rounded-full bg-success pulse-dot"></span>
+        <span>Live · updated <span id="merit-updated-seconds">3</span>s ago</span>
+      </div>
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto pb-1">
+      <button class="shrink-0 bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full">General</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">Freedom Fighter</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">Tribal</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">District Quota</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-canvas text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Rank</th>
+            <th class="text-left font-medium px-4 py-3">Candidate</th>
+            <th class="text-left font-medium px-4 py-3">Score</th>
+            <th class="text-left font-medium px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="merit-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: ADMIT CARD
+       ============================================================ -->
+  <section id="view-admitcard" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Admit Card</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5" id="admitcard-pending">
+      <div class="flex items-center gap-3 mb-1">
+        <svg class="animate-spin h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <p class="font-semibold text-sm">Your admit card is being generated</p>
+      </div>
+      <p class="text-xs text-slate-500 ml-8">This usually takes a few minutes after payment confirmation. Check back shortly.</p>
+      <button id="btn-simulate-ready" class="ml-8 mt-3 text-xs font-semibold text-primary hover:underline">Simulate: mark as ready →</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5 hidden" id="admitcard-ready">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-16 bg-primary-light border border-primary/20 rounded-md flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Roll No. DU-CSE-2026-04421</p>
+            <p class="text-xs text-slate-500">Exam Date: August 1, 2026 · Kazi Nazrul Islam Hall</p>
+          </div>
+        </div>
+        <button class="bg-primary text-white font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-primary-hover transition shrink-0">Download PDF</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================================
+     BOTTOM NAV — mobile only, primary actions within thumb reach
+     ============================================================ -->
+<nav id="bottom-nav" class="md:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-slate-200 flex justify-around py-2 z-30">
+  <button data-view-btn="dashboard" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z"/></svg>
+    <span class="text-[10px] font-medium">Home</span>
+  </button>
+  <button data-view-btn="reservation" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+    <span class="text-[10px] font-medium">Reserve</span>
+  </button>
+  <button data-view-btn="payment" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    <span class="text-[10px] font-medium">Payment</span>
+  </button>
+  <button data-view-btn="meritlist" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+    <span class="text-[10px] font-medium">Merit</span>
+  </button>
+  <button data-view-btn="admitcard" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+    <span class="text-[10px] font-medium">Card</span>
+  </button>
+</nav>
+
+<script>
+  /**
+   * View router — pure client-side show/hide toggle simulating page
+   * navigation for prototype purposes. A real build replaces this with
+   * React Router per the frontend spec; this exists only to demo the
+   * screen flow in a single static file.
+   */
+  // Views that represent a pre-authenticated state — the app shell
+  // (main nav, identity chip, bottom nav) is hidden on these so the
+  // prototype doesn't imply a logged-in session before one exists.
+  const PUBLIC_VIEWS = ['landing', 'login', 'register'];
+
+  function switchView(viewName) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + viewName).classList.add('active');
+
+    const isPublic = PUBLIC_VIEWS.includes(viewName);
+
+    document.getElementById('app-nav').classList.toggle('hidden', isPublic);
+    document.getElementById('app-identity').classList.toggle('hidden', isPublic);
+    document.getElementById('public-nav').classList.toggle('hidden', !isPublic);
+    document.getElementById('public-nav').classList.toggle('flex', isPublic);
+    document.getElementById('bottom-nav').classList.toggle('hidden', isPublic);
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.toggle('bg-primary-light', btn.dataset.viewBtn === viewName);
+      btn.classList.toggle('text-primary', btn.dataset.viewBtn === viewName);
+      btn.classList.toggle('text-slate-600', btn.dataset.viewBtn !== viewName);
+    });
+    document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+      btn.classList.toggle('text-primary', btn.dataset.viewBtn === viewName);
+      btn.classList.toggle('text-slate-400', btn.dataset.viewBtn !== viewName);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('[data-view-btn]').forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.dataset.viewBtn));
+  });
+  switchView('landing');
+
+  /**
+   * Login form — client-side prototype only. Any non-empty phone and
+   * password (min length check) is treated as valid so the demo flow
+   * can proceed to the dashboard. Real validation happens server-side.
+   */
+  document.getElementById('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const phone = document.getElementById('login-phone').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errorBox = document.getElementById('login-error');
+
+    if (phone.length < 11 || password.length < 4) {
+      errorBox.textContent = 'Enter a valid phone number and password to continue.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    errorBox.classList.add('hidden');
+    switchView('dashboard');
+  });
+
+  /**
+   * Register form — prototype-only validation mirroring the production
+   * Zod schema shape (name, phone, optional email, min-8 password).
+   * On success, routes to login rather than auto-authenticating, since
+   * the real flow requires a separate credential-based sign-in step.
+   */
+  document.getElementById('register-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const errorBox = document.getElementById('register-error');
+
+    if (name.length < 2 || phone.length < 11 || password.length < 8) {
+      errorBox.textContent = 'Please check your name, phone number, and password (min 8 characters).';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    errorBox.classList.add('hidden');
+    switchView('login');
+  });
+
+  /**
+   * Renders the seat grid visualization — 60 seats total, ~46 filled,
+   * with the current student's own seat highlighted distinctly.
+   * Illustrates the seat-quota abstraction literally rather than as
+   * a bare percentage bar, per the design brief's signature element.
+   */
+  function renderSeatGrid() {
+    const grid = document.getElementById('seat-grid');
+    const total = 60, filled = 46, mySeatIndex = 46;
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      let cls = 'bg-slate-200';
+      if (i === mySeatIndex) cls = 'bg-accent';
+      else if (i < filled) cls = 'bg-primary';
+      html += `<div class="aspect-square rounded-sm ${cls}"></div>`;
+    }
+    grid.innerHTML = html;
+  }
+  renderSeatGrid();
+
+  /**
+   * Renders a simplified version of the seat grid for the landing page
+   * hero — same visual language, no "your seat" highlight since the
+   * visitor hasn't applied yet at this point in the flow.
+   */
+  function renderHeroSeatGrid() {
+    const grid = document.getElementById('hero-seat-grid');
+    const total = 60, filled = 46;
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      html += `<div class="aspect-square rounded-sm ${i < filled ? 'bg-primary' : 'bg-slate-200'}"></div>`;
+    }
+    grid.innerHTML = html;
+  }
+  renderHeroSeatGrid();
+
+  /**
+   * Live countdown timer for the seat reservation hold. Ticks every
+   * second from a fixed starting duration; on reaching zero, disables
+   * the payment CTA and reveals the expiry banner — this mirrors the
+   * "no stale button" requirement from the production frontend spec.
+   */
+  (function initCountdown() {
+    let remaining = 14 * 60 + 59;
+    const display = document.getElementById('countdown-display');
+    const proceedBtn = document.getElementById('btn-proceed-payment');
+    const expiredBanner = document.getElementById('expired-banner');
+
+    const timer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(timer);
+        display.textContent = '00:00';
+        proceedBtn.disabled = true;
+        proceedBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        expiredBanner.classList.remove('hidden');
+        return;
+      }
+      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const s = (remaining % 60).toString().padStart(2, '0');
+      display.textContent = `${m}:${s}`;
+    }, 1000);
+  })();
+
+  /**
+   * Payment flow simulation: initiate -> polling state -> success state,
+   * demonstrating the three-state pattern (idle/loading/resolved) rather
+   * than an instant fake success, since the real backend verifies payment
+   * asynchronously.
+   */
+  document.getElementById('btn-initiate-payment').addEventListener('click', function () {
+    this.disabled = true;
+    this.textContent = 'Redirecting to bKash…';
+    document.getElementById('payment-polling').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('payment-polling').classList.add('hidden');
+      document.getElementById('payment-success').classList.remove('hidden');
+      this.classList.add('hidden');
+    }, 2800);
+  });
+
+  /**
+   * Populates the live merit list table with sample rows, highlighting
+   * the current student's own rank distinctly per the spec (Section 6.4).
+   */
+  function renderMeritList() {
+    const rows = [
+      { rank: 209, name: 'Tania Islam', score: 89.4, status: 'confirmed' },
+      { rank: 210, name: 'Mehedi Hasan', score: 89.2, status: 'seat_reserved' },
+      { rank: 211, name: 'Fatema Akter', score: 89.1, status: 'confirmed' },
+      { rank: 212, name: 'Rahim Uddin (You)', score: 88.9, status: 'seat_reserved', isMe: true },
+      { rank: 213, name: 'Sabbir Ahmed', score: 88.7, status: 'pending' },
+      { rank: 214, name: 'Nusrat Jahan', score: 88.5, status: 'pending' },
+    ];
+
+    const statusStyles = {
+      confirmed: 'bg-success-light text-success',
+      seat_reserved: 'bg-accent-light text-accent',
+      pending: 'bg-slate-100 text-slate-500',
+    };
+
+    document.getElementById('merit-rows').innerHTML = rows.map(r => `
+      <tr class="${r.isMe ? 'bg-primary-light' : ''}">
+        <td class="px-4 py-3 font-semibold">#${r.rank}</td>
+        <td class="px-4 py-3 ${r.isMe ? 'font-semibold text-primary' : ''}">${r.name}</td>
+        <td class="px-4 py-3 tabular-nums">${r.score}</td>
+        <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusStyles[r.status]}">${r.status.replace('_', ' ')}</span></td>
+      </tr>
+    `).join('');
+  }
+  renderMeritList();
+
+  // "Updated Xs ago" ticker — resets on simulated refetch every 12s,
+  // matching the polling interval specified in the production spec.
+  (function initMeritTicker() {
+    let seconds = 0;
+    const el = document.getElementById('merit-updated-seconds');
+    setInterval(() => {
+      seconds += 1;
+      if (seconds > 12) seconds = 0;
+      el.textContent = seconds;
+    }, 1000);
+  })();
+
+  // Admit card ready-state simulation toggle
+  document.getElementById('btn-simulate-ready').addEventListener('click', () => {
+    document.getElementById('admitcard-pending').classList.add('hidden');
+    document.getElementById('admitcard-ready').classList.remove('hidden');
+  });
+</script>
+</body>
+</html>

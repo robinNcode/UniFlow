@@ -37,15 +37,16 @@ export type PaymentStatus =
   | 'confirmed'
   | 'failed';
 
-export interface StudentProfile {
+export interface UserProfile {
   id: string;
   fullName: string;
   phone: string;
+  role: 'student' | 'admin';
 }
 
 export interface AuthResponse {
   token: string;
-  student: StudentProfile;
+  user: UserProfile;
 }
 
 export interface LoginRequest {

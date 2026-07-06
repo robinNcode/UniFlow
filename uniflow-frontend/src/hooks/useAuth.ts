@@ -10,7 +10,7 @@ import { toast } from 'sonner';
  * Auth hook — wraps login/register mutations and auth state management.
  */
 export function useAuth() {
-  const { setAuth, logout, isAuthenticated, student } = useAuthStore();
+  const { setAuth, logout, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -21,9 +21,9 @@ export function useAuth() {
       return authApi.login({ ...data, phone: normalized });
     },
     onSuccess: (data) => {
-      setAuth(data.token, data.student);
+      setAuth(data.token, data.user);
       toast.success('Welcome back!');
-      const returnTo = searchParams.get('returnTo') || '/dashboard';
+      const returnTo = searchParams.get('returnTo') || (data.user.role === 'admin' ? '/admin' : '/dashboard');
       navigate(returnTo);
     },
   });
@@ -35,7 +35,7 @@ export function useAuth() {
       return authApi.register({ ...data, phone: normalized });
     },
     onSuccess: (data) => {
-      setAuth(data.token, data.student);
+      setAuth(data.token, data.user);
       toast.success('Account created successfully!');
       navigate('/dashboard');
     },
@@ -52,6 +52,6 @@ export function useAuth() {
     registerMutation,
     logout: handleLogout,
     isAuthenticated,
-    student,
+    user,
   };
 }

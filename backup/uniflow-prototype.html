@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>uniFlow — Admission Portal Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  // Tailwind theme extension — tokens match the design system already
+  // established for uniFlow: deep teal primary, amber reserved strictly
+  // for time-sensitive states, not decorative use. Kept identical across
+  // Student and Admin panels — differentiating panels through a role
+  // badge/label rather than a separate color scheme, since a second
+  // brand palette per panel would fragment the product's identity.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: { DEFAULT: '#0F4C5C', hover: '#0B3A47', light: '#E6EEEF' },
+          accent: { DEFAULT: '#D97706', light: '#FEF3E2' },
+          success: { DEFAULT: '#15803D', light: '#E8F5EC' },
+          danger: { DEFAULT: '#B91C1C', light: '#FBEAEA' },
+          surface: '#FFFFFF',
+          canvas: '#F8FAFC',
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; background-color: #F8FAFC; }
+  .pulse-dot { animation: pulse-live 1.6s ease-in-out infinite; }
+  @keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot { animation: none; }
+  }
+</style>
+</head>
+<body class="text-slate-900 antialiased">
+
+<!-- ============================================================
+     TOP NAV
+     Three mutually exclusive states toggled by JS based on the
+     current panel: guest (landing/login/register), student, admin.
+     ============================================================ -->
+<header class="sticky top-0 z-30 bg-surface border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/></svg>
+      </div>
+      <span class="font-bold text-lg tracking-tight">uni<span class="text-primary">Flow</span></span>
+      <span id="admin-badge" class="hidden text-[10px] font-bold uppercase tracking-wide bg-slate-900 text-white px-1.5 py-0.5 rounded">Admin</span>
+    </div>
+
+    <!-- Student nav -->
+    <nav id="student-nav" class="hidden md:flex items-center gap-1 text-sm font-medium">
+      <button data-view-btn="dashboard" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Dashboard</button>
+      <button data-view-btn="application" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Application</button>
+      <button data-view-btn="reservation" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Seat Reservation</button>
+      <button data-view-btn="payment" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Payment</button>
+      <button data-view-btn="meritlist" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Merit List</button>
+      <button data-view-btn="admitcard" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Admit Card</button>
+    </nav>
+
+    <!-- Admin nav -->
+    <nav id="admin-nav" class="hidden md:flex items-center gap-1 text-sm font-medium">
+      <button data-view-btn="admin-dashboard" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Overview</button>
+      <button data-view-btn="admin-applications" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Applications</button>
+      <button data-view-btn="admin-seatquotas" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Seat Quotas</button>
+      <button data-view-btn="admin-payments" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Payments</button>
+      <button data-view-btn="admin-meritlist" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Merit List</button>
+      <button data-view-btn="admin-notifications" class="nav-btn px-3 py-2 rounded-md text-slate-600 hover:bg-slate-100">Notifications</button>
+    </nav>
+
+    <!-- Authenticated identity chip — label/initials swapped by JS per panel -->
+    <div id="app-identity" class="hidden items-center gap-3">
+      <span class="hidden sm:block text-sm text-slate-500" id="identity-name">Rahim Uddin</span>
+      <div class="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold" id="identity-initials">RU</div>
+      <button data-view-btn="landing" class="hidden sm:block text-xs font-medium text-slate-400 hover:text-danger ml-1">Log Out</button>
+    </div>
+
+    <!-- Public (pre-auth) actions -->
+    <div id="public-nav" class="hidden items-center gap-2">
+      <button data-view-btn="login" class="text-sm font-medium text-slate-600 hover:text-primary px-3 py-2">Log In</button>
+      <button data-view-btn="register" class="bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary-hover transition">Sign Up</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-10">
+
+  <!-- ============================================================
+       VIEW: LANDING
+       ============================================================ -->
+  <section id="view-landing" class="view space-y-16 -mt-2">
+
+    <div class="grid md:grid-cols-2 gap-10 items-center pt-6 md:pt-14">
+      <div>
+        <span class="inline-block bg-primary-light text-primary text-xs font-semibold px-3 py-1 rounded-full mb-4">Combined Admission Cycle 2026</span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          One seat. One deadline.<br class="hidden sm:block"> Zero guesswork.
+        </h1>
+        <p class="text-slate-500 mt-4 text-base leading-relaxed">
+          Apply, reserve your seat, pay, and track your live merit rank — all in one place, built to stay accurate even when thousands of applicants log in at once.
+        </p>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <button data-view-btn="register" class="bg-primary text-white font-semibold text-sm px-5 py-3 rounded-lg hover:bg-primary-hover transition">Get Started</button>
+          <button data-view-btn="login" class="bg-surface border border-slate-300 text-slate-700 font-semibold text-sm px-5 py-3 rounded-lg hover:bg-slate-50 transition">I already have an account</button>
+        </div>
+        <div class="flex items-center gap-6 mt-8 text-xs text-slate-400">
+          <span><span class="font-bold text-slate-700">4,820</span> applicants tracked live</span>
+          <span><span class="font-bold text-slate-700">37</span> partner programs</span>
+        </div>
+      </div>
+
+      <div class="bg-surface border border-slate-200 rounded-2xl p-6">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">General Quota — CSE, University of Dhaka</p>
+        <div class="grid grid-cols-10 gap-1.5 mb-4" id="hero-seat-grid"></div>
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+          <span>46 of 60 seats filled</span>
+          <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-success pulse-dot"></span>Live</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Seat Reservation</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Hold your seat under quota rules with a transparent, time-boxed reservation window.</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Live Merit List</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Track your exact rank as it updates — not a static snapshot from yesterday.</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Verified Payment</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Pay via bKash, Nagad, or Rocket with confirmation you can actually trust.</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <div class="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        </div>
+        <p class="font-semibold text-sm mb-1">Instant Admit Card</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Download your admit card the moment it's generated — no office visit required.</p>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <p class="text-xs text-slate-400">University staff — <button data-view-btn="login" data-role-tab="admin" class="text-primary font-semibold hover:underline">go to Admin login</button></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: LOGIN — Student / Admin tabs.
+       Note: this shared form is a prototype convenience. In the real
+       system, admin accounts are provisioned internally (no public
+       self-registration), and admin authentication should carry
+       stricter controls (mandatory 2FA, IP allow-listing, shorter
+       session TTL) than the student-facing login — worth treating
+       as a genuinely separate auth flow at implementation time,
+       not just a different landing tab on the same form.
+       ============================================================ -->
+  <section id="view-login" class="view">
+    <div class="max-w-md mx-auto pt-6 md:pt-14">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold">Log in to uniFlow</h1>
+        <p class="text-slate-500 text-sm mt-1">Enter your credentials to continue.</p>
+      </div>
+
+      <div class="flex bg-slate-100 rounded-lg p-1 mb-5 max-w-xs mx-auto">
+        <button id="tab-role-student" class="role-tab flex-1 text-sm font-semibold py-2 rounded-md bg-white shadow-sm text-primary">Student</button>
+        <button id="tab-role-admin" class="role-tab flex-1 text-sm font-semibold py-2 rounded-md text-slate-500">Admin</button>
+      </div>
+
+      <form id="login-form" class="bg-surface border border-slate-200 rounded-xl p-6 space-y-4">
+        <div>
+          <label for="login-phone" class="block text-sm font-medium mb-1.5" id="login-identifier-label">Phone Number</label>
+          <input id="login-phone" type="tel" placeholder="01XXXXXXXXX" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div>
+          <label for="login-password" class="block text-sm font-medium mb-1.5">Password</label>
+          <input id="login-password" type="password" placeholder="••••••••" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div id="login-error" class="hidden bg-danger-light border border-danger/20 rounded-lg px-3.5 py-2.5 text-xs text-danger font-medium"></div>
+        <button type="submit" class="w-full bg-primary text-white font-semibold text-sm py-3 rounded-lg hover:bg-primary-hover transition">Log In</button>
+      </form>
+
+      <p id="login-register-hint" class="text-center text-sm text-slate-500 mt-5">
+        Don't have an account?
+        <button data-view-btn="register" class="text-primary font-semibold hover:underline">Sign up</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: REGISTER — student self-registration only.
+       ============================================================ -->
+  <section id="view-register" class="view">
+    <div class="max-w-md mx-auto pt-6 md:pt-14 pb-4">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold">Create your account</h1>
+        <p class="text-slate-500 text-sm mt-1">Takes about a minute. You'll use your phone number to log in.</p>
+      </div>
+
+      <form id="register-form" class="bg-surface border border-slate-200 rounded-xl p-6 space-y-4">
+        <div>
+          <label for="reg-name" class="block text-sm font-medium mb-1.5">Full Name</label>
+          <input id="reg-name" type="text" placeholder="As per your SSC certificate" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div>
+          <label for="reg-phone" class="block text-sm font-medium mb-1.5">Phone Number</label>
+          <input id="reg-phone" type="tel" placeholder="01XXXXXXXXX" required
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          <p class="text-xs text-slate-400 mt-1">Accepts 01XXXXXXXXX or +8801XXXXXXXXX format.</p>
+        </div>
+        <div>
+          <label for="reg-email" class="block text-sm font-medium mb-1.5">Email <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input id="reg-email" type="email" placeholder="you@example.com"
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div>
+          <label for="reg-password" class="block text-sm font-medium mb-1.5">Password</label>
+          <input id="reg-password" type="password" placeholder="At least 8 characters" required minlength="8"
+            class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+        <div id="register-error" class="hidden bg-danger-light border border-danger/20 rounded-lg px-3.5 py-2.5 text-xs text-danger font-medium"></div>
+        <button type="submit" class="w-full bg-primary text-white font-semibold text-sm py-3 rounded-lg hover:bg-primary-hover transition">Create Account</button>
+      </form>
+
+      <p class="text-center text-sm text-slate-500 mt-5">
+        Already have an account?
+        <button data-view-btn="login" class="text-primary font-semibold hover:underline">Log in</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STUDENT PANEL
+       ============================================================ -->
+
+  <!-- VIEW: STUDENT DASHBOARD -->
+  <section id="view-dashboard" class="view space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">Welcome back, Rahim</h1>
+      <p class="text-slate-500 text-sm mt-1">Dhaka University — Combined Admission Cycle 2026</p>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Application Status</p>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-accent"></span>
+          <span class="font-semibold text-sm">Seat Reserved</span>
+        </div>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Current Merit Rank</p>
+        <p class="mt-2 font-semibold text-sm">#212 <span class="text-slate-400 font-normal">of 4,820 · General</span></p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Admission Window Closes</p>
+        <p class="mt-2 font-semibold text-sm">2 days 6 hours</p>
+      </div>
+    </div>
+
+    <div class="bg-primary rounded-xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <p class="font-semibold">Your seat hold expires soon</p>
+        <p class="text-sm text-white/80">Complete payment to confirm your seat under the General quota.</p>
+      </div>
+      <button data-view-btn="payment" class="shrink-0 bg-white text-primary font-semibold text-sm px-4 py-2 rounded-lg hover:bg-slate-100">Proceed to Payment</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-4">
+      <h2 class="font-semibold text-sm mb-3">Recent Notifications</h2>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <li class="py-2.5 flex justify-between"><span>Seat reservation confirmed for CSE — General quota</span><span class="text-slate-400 text-xs shrink-0 ml-3">2m ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Application submitted successfully</span><span class="text-slate-400 text-xs shrink-0 ml-3">1h ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Merit list published for Combined Admission Cycle 2026</span><span class="text-slate-400 text-xs shrink-0 ml-3">1d ago</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- VIEW: APPLICATION STATUS -->
+  <section id="view-application" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Application Status</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <p class="font-semibold">Computer Science &amp; Engineering</p>
+          <p class="text-sm text-slate-500">University of Dhaka · Application #DU-2026-88213</p>
+        </div>
+        <span class="bg-accent-light text-accent text-xs font-semibold px-2.5 py-1 rounded-full">Seat Reserved</span>
+      </div>
+
+      <ol class="space-y-0">
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full bg-success flex items-center justify-center text-white text-xs">✓</div>
+            <div class="w-px flex-1 bg-success"></div>
+          </div>
+          <div class="pb-5">
+            <p class="text-sm font-medium">Application Submitted</p>
+            <p class="text-xs text-slate-400">July 2, 2026 — 11:04 AM</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full bg-success flex items-center justify-center text-white text-xs">✓</div>
+            <div class="w-px flex-1 bg-accent"></div>
+          </div>
+          <div class="pb-5">
+            <p class="text-sm font-medium">Seat Reserved — General Quota</p>
+            <p class="text-xs text-slate-400">July 6, 2026 — 10:15 AM</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+            <div class="w-px flex-1 bg-slate-200"></div>
+          </div>
+          <div class="pb-5">
+            <p class="text-sm font-medium text-slate-400">Payment Verification</p>
+            <p class="text-xs text-slate-400">Pending</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-slate-400">Admission Confirmed</p>
+            <p class="text-xs text-slate-400">Pending</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- VIEW: SEAT RESERVATION -->
+  <section id="view-reservation" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Seat Reservation</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="font-semibold text-sm">General Quota — CSE, University of Dhaka</p>
+      </div>
+
+      <div class="grid grid-cols-10 gap-1.5 mb-4" id="seat-grid"></div>
+      <p class="text-xs text-slate-500 mb-5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-primary align-middle mr-1"></span>Filled &nbsp;
+        <span class="inline-block w-2.5 h-2.5 rounded-sm bg-accent align-middle mr-1"></span>Your seat &nbsp;
+        <span class="inline-block w-2.5 h-2.5 rounded-sm bg-slate-200 align-middle mr-1"></span>Available</p>
+
+      <div class="bg-accent-light border border-accent/20 rounded-lg p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-accent uppercase tracking-wide">Reservation expires in</p>
+          <p class="text-2xl font-bold text-accent tabular-nums" id="countdown-display">14:59</p>
+        </div>
+        <button id="btn-proceed-payment" data-view-btn="payment" class="bg-accent text-white font-semibold text-sm px-4 py-2.5 rounded-lg hover:opacity-90 transition">
+          Proceed to Payment
+        </button>
+      </div>
+
+      <div id="expired-banner" class="hidden mt-4 bg-danger-light border border-danger/20 rounded-lg p-4">
+        <p class="text-sm font-semibold text-danger">Reservation expired — seat released</p>
+        <p class="text-xs text-danger/80 mt-1">Your held seat has returned to the available pool. You may attempt to reserve again if seats remain.</p>
+        <button class="mt-3 bg-danger text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90">Try Reserving Again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW: PAYMENT -->
+  <section id="view-payment" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Payment</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5 space-y-5">
+      <div class="flex justify-between text-sm">
+        <span class="text-slate-500">Admission Fee</span>
+        <span class="font-semibold">৳ 2,450.00</span>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium mb-2">Select payment method</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button class="pay-method border-2 border-primary bg-primary-light rounded-lg py-3 text-xs font-semibold text-primary">bKash</button>
+          <button class="pay-method border-2 border-slate-200 rounded-lg py-3 text-xs font-semibold text-slate-500 hover:border-slate-300">Nagad</button>
+          <button class="pay-method border-2 border-slate-200 rounded-lg py-3 text-xs font-semibold text-slate-500 hover:border-slate-300">Rocket</button>
+        </div>
+      </div>
+
+      <button id="btn-initiate-payment" class="w-full bg-primary text-white font-semibold text-sm py-3 rounded-lg hover:bg-primary-hover transition">
+        Pay ৳ 2,450.00
+      </button>
+
+      <div id="payment-polling" class="hidden bg-canvas border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+        <svg class="animate-spin h-5 w-5 text-primary shrink-0" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <div>
+          <p class="text-sm font-medium">Verifying your payment…</p>
+          <p class="text-xs text-slate-500">This can take up to a minute. Do not close this page.</p>
+        </div>
+      </div>
+
+      <div id="payment-success" class="hidden bg-success-light border border-success/20 rounded-lg p-4 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-success text-white flex items-center justify-center shrink-0">✓</div>
+        <div>
+          <p class="text-sm font-semibold text-success">Payment Verified</p>
+          <p class="text-xs text-success/80">Your admission is now confirmed. Your admit card is being generated.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW: LIVE MERIT LIST (Student) -->
+  <section id="view-meritlist" class="view space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">Live Merit List</h1>
+      <div class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-2 h-2 rounded-full bg-success pulse-dot"></span>
+        <span>Live · updated <span id="merit-updated-seconds">3</span>s ago</span>
+      </div>
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto pb-1">
+      <button class="shrink-0 bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full">General</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">Freedom Fighter</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">Tribal</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">District Quota</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-canvas text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Rank</th>
+            <th class="text-left font-medium px-4 py-3">Candidate</th>
+            <th class="text-left font-medium px-4 py-3">Score</th>
+            <th class="text-left font-medium px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="merit-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VIEW: ADMIT CARD -->
+  <section id="view-admitcard" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Admit Card</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5" id="admitcard-pending">
+      <div class="flex items-center gap-3 mb-1">
+        <svg class="animate-spin h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <p class="font-semibold text-sm">Your admit card is being generated</p>
+      </div>
+      <p class="text-xs text-slate-500 ml-8">This usually takes a few minutes after payment confirmation. Check back shortly.</p>
+      <button id="btn-simulate-ready" class="ml-8 mt-3 text-xs font-semibold text-primary hover:underline">Simulate: mark as ready →</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5 hidden" id="admitcard-ready">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-16 bg-primary-light border border-primary/20 rounded-md flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F4C5C" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Roll No. DU-CSE-2026-04421</p>
+            <p class="text-xs text-slate-500">Exam Date: August 1, 2026 · Kazi Nazrul Islam Hall</p>
+          </div>
+        </div>
+        <button class="bg-primary text-white font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-primary-hover transition shrink-0">Download PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ADMIN PANEL
+       ============================================================ -->
+
+  <!-- VIEW: ADMIN OVERVIEW -->
+  <section id="view-admin-dashboard" class="view space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">Admission Overview</h1>
+      <p class="text-slate-500 text-sm mt-1">University of Dhaka — Combined Admission Cycle 2026</p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Applications</p>
+        <p class="mt-2 text-2xl font-bold">4,820</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Seats Confirmed</p>
+        <p class="mt-2 text-2xl font-bold text-success">312 <span class="text-sm font-medium text-slate-400">/ 480</span></p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Pending Payments</p>
+        <p class="mt-2 text-2xl font-bold text-accent">58</p>
+      </div>
+      <div class="bg-surface border border-slate-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Reservations Expiring &lt;1h</p>
+        <p class="mt-2 text-2xl font-bold text-danger">14</p>
+      </div>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5">
+      <h2 class="font-semibold text-sm mb-4">Quota Fill Rate by Program</h2>
+      <div class="space-y-4" id="admin-quota-bars"></div>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-4">
+      <h2 class="font-semibold text-sm mb-3">Recent Activity</h2>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <li class="py-2.5 flex justify-between"><span>Payment verified — Application #DU-2026-88213</span><span class="text-slate-400 text-xs shrink-0 ml-3">1m ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Seat reservation expired and released — General quota, CSE</span><span class="text-slate-400 text-xs shrink-0 ml-3">6m ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Merit list recalculated — 4,820 candidates re-ranked</span><span class="text-slate-400 text-xs shrink-0 ml-3">12m ago</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- VIEW: ADMIN APPLICATIONS -->
+  <section id="view-admin-applications" class="view space-y-6">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <h1 class="text-2xl font-bold">Applications</h1>
+      <input type="text" placeholder="Search by name, phone, or application ID"
+        class="border border-slate-300 rounded-lg px-3.5 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto pb-1">
+      <button class="status-filter shrink-0 bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full" data-status="all">All</button>
+      <button class="status-filter shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600" data-status="seat_reserved">Seat Reserved</button>
+      <button class="status-filter shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600" data-status="payment_pending">Payment Pending</button>
+      <button class="status-filter shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600" data-status="confirmed">Confirmed</button>
+      <button class="status-filter shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600" data-status="expired">Expired</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
+      <table class="w-full text-sm min-w-[640px]">
+        <thead class="bg-canvas text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Applicant</th>
+            <th class="text-left font-medium px-4 py-3">Program</th>
+            <th class="text-left font-medium px-4 py-3">Quota</th>
+            <th class="text-left font-medium px-4 py-3">Status</th>
+            <th class="text-left font-medium px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="admin-applications-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VIEW: ADMIN SEAT QUOTAS -->
+  <section id="view-admin-seatquotas" class="view space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">Seat Quotas</h1>
+      <button class="bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary-hover transition">+ New Quota</button>
+    </div>
+    <p class="text-xs text-slate-500 -mt-4">Changes here affect the live reservation pool immediately. Reducing total seats below the current filled count is blocked.</p>
+
+    <div class="bg-surface border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
+      <table class="w-full text-sm min-w-[560px]">
+        <thead class="bg-canvas text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Quota Type</th>
+            <th class="text-left font-medium px-4 py-3">Filled / Total</th>
+            <th class="text-left font-medium px-4 py-3">Fill Rate</th>
+            <th class="text-left font-medium px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="admin-quota-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VIEW: ADMIN PAYMENTS -->
+  <section id="view-admin-payments" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Payment Verification Queue</h1>
+    <p class="text-xs text-slate-500 -mt-4">Duplicate provider callbacks are deduplicated automatically before reaching this queue — entries here represent genuinely unresolved cases.</p>
+
+    <div class="bg-surface border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
+      <table class="w-full text-sm min-w-[600px]">
+        <thead class="bg-canvas text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Applicant</th>
+            <th class="text-left font-medium px-4 py-3">Provider</th>
+            <th class="text-left font-medium px-4 py-3">Amount</th>
+            <th class="text-left font-medium px-4 py-3">Status</th>
+            <th class="text-left font-medium px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="admin-payments-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VIEW: ADMIN MERIT LIST -->
+  <section id="view-admin-meritlist" class="view space-y-6">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <h1 class="text-2xl font-bold">Merit List Management</h1>
+      <div class="flex gap-2">
+        <button id="btn-recalculate-merit" class="bg-surface border border-slate-300 text-slate-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-slate-50 transition">Recalculate</button>
+        <button class="bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary-hover transition">Publish</button>
+      </div>
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto pb-1">
+      <button class="shrink-0 bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full">General</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">Freedom Fighter</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">Tribal</button>
+      <button class="shrink-0 bg-surface border border-slate-200 text-xs font-medium px-3 py-1.5 rounded-full text-slate-600">District Quota</button>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-canvas text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Rank</th>
+            <th class="text-left font-medium px-4 py-3">Candidate</th>
+            <th class="text-left font-medium px-4 py-3">Score</th>
+            <th class="text-left font-medium px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="admin-merit-rows"></tbody>
+      </table>
+    </div>
+    <p id="recalc-confirm" class="hidden text-xs text-success font-medium">Merit list recalculated — 4,820 candidates re-ranked just now.</p>
+  </section>
+
+  <!-- VIEW: ADMIN NOTIFICATIONS -->
+  <section id="view-admin-notifications" class="view space-y-6">
+    <h1 class="text-2xl font-bold">Notifications</h1>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-5 space-y-3">
+      <h2 class="font-semibold text-sm">Send Broadcast Notification</h2>
+      <input type="text" placeholder="Subject"
+        class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+      <textarea rows="3" placeholder="Message body"
+        class="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"></textarea>
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex gap-3 text-xs text-slate-500">
+          <label class="flex items-center gap-1.5"><input type="checkbox" checked class="rounded"> SMS</label>
+          <label class="flex items-center gap-1.5"><input type="checkbox" checked class="rounded"> Email</label>
+        </div>
+        <button id="btn-send-broadcast" class="bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary-hover transition">Send to All Applicants</button>
+      </div>
+      <p id="broadcast-confirm" class="hidden text-xs text-success font-medium">Broadcast queued — delivery to 4,820 recipients in progress.</p>
+    </div>
+
+    <div class="bg-surface border border-slate-200 rounded-xl p-4">
+      <h2 class="font-semibold text-sm mb-3">Delivery Log</h2>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <li class="py-2.5 flex justify-between"><span>Merit list published — 4,820 SMS, 3,102 email</span><span class="text-slate-400 text-xs shrink-0 ml-3">Delivered · 1d ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Payment deadline reminder — 58 SMS</span><span class="text-slate-400 text-xs shrink-0 ml-3">Delivered · 3h ago</span></li>
+        <li class="py-2.5 flex justify-between"><span>Admission window closing reminder — 4,820 SMS</span><span class="text-slate-400 text-xs shrink-0 ml-3">Delivered · 6h ago</span></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================================
+     BOTTOM NAV — Student (mobile only)
+     ============================================================ -->
+<nav id="student-bottom-nav" class="md:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-slate-200 flex justify-around py-2 z-30">
+  <button data-view-btn="dashboard" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z"/></svg>
+    <span class="text-[10px] font-medium">Home</span>
+  </button>
+  <button data-view-btn="reservation" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+    <span class="text-[10px] font-medium">Reserve</span>
+  </button>
+  <button data-view-btn="payment" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    <span class="text-[10px] font-medium">Payment</span>
+  </button>
+  <button data-view-btn="meritlist" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg>
+    <span class="text-[10px] font-medium">Merit</span>
+  </button>
+  <button data-view-btn="admitcard" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+    <span class="text-[10px] font-medium">Card</span>
+  </button>
+</nav>
+
+<!-- ============================================================
+     BOTTOM NAV — Admin (mobile only)
+     ============================================================ -->
+<nav id="admin-bottom-nav" class="hidden md:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-slate-200 justify-around py-2 z-30">
+  <button data-view-btn="admin-dashboard" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+    <span class="text-[10px] font-medium">Overview</span>
+  </button>
+  <button data-view-btn="admin-applications" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+    <span class="text-[10px] font-medium">Apps</span>
+  </button>
+  <button data-view-btn="admin-seatquotas" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+    <span class="text-[10px] font-medium">Quotas</span>
+  </button>
+  <button data-view-btn="admin-payments" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    <span class="text-[10px] font-medium">Payments</span>
+  </button>
+  <button data-view-btn="admin-notifications" class="nav-btn-mobile flex flex-col items-center gap-1 px-2 py-1 text-slate-400">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span class="text-[10px] font-medium">Alerts</span>
+  </button>
+</nav>
+
+<!-- ============================================================
+     PROTOTYPE-ONLY DEMO CONTROL
+     Not part of the product — lets a reviewer jump between panels
+     without re-running the login form each time. Remove before
+     handing this markup to an implementation agent.
+     ============================================================ -->
+<div class="fixed bottom-20 md:bottom-4 right-4 z-40 bg-slate-900 text-white rounded-xl shadow-lg p-3 text-xs flex flex-col gap-2 w-40">
+  <p class="font-semibold text-[10px] uppercase tracking-wide text-slate-400">Prototype: view as</p>
+  <button data-view-btn="landing" class="text-left hover:text-accent">Guest / Landing</button>
+  <button data-view-btn="dashboard" class="text-left hover:text-accent">Student Panel</button>
+  <button data-view-btn="admin-dashboard" class="text-left hover:text-accent">Admin Panel</button>
+</div>
+
+<script>
+  // Maps every view name to the panel it belongs to, so switchView can
+  // toggle the correct nav/identity/bottom-nav combination in one place
+  // rather than special-casing each view individually.
+  const VIEW_PANEL = {
+    landing: 'guest', login: 'guest', register: 'guest',
+    dashboard: 'student', application: 'student', reservation: 'student',
+    payment: 'student', meritlist: 'student', admitcard: 'student',
+    'admin-dashboard': 'admin', 'admin-applications': 'admin',
+    'admin-seatquotas': 'admin', 'admin-payments': 'admin',
+    'admin-meritlist': 'admin', 'admin-notifications': 'admin',
+  };
+
+  /**
+   * Central view router for the prototype. Shows the requested view,
+   * hides all others, and toggles the header/bottom-nav combination
+   * to match the view's panel (guest / student / admin). This mirrors
+   * how a real app would gate routes behind role-aware layouts rather
+   * than a single shared shell.
+   */
+  function switchView(viewName) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + viewName).classList.add('active');
+
+    const panel = VIEW_PANEL[viewName];
+
+    document.getElementById('student-nav').classList.toggle('hidden', panel !== 'student');
+    document.getElementById('admin-nav').classList.toggle('hidden', panel !== 'admin');
+    document.getElementById('admin-badge').classList.toggle('hidden', panel !== 'admin');
+    document.getElementById('app-identity').classList.toggle('hidden', panel === 'guest');
+    document.getElementById('app-identity').classList.toggle('flex', panel !== 'guest');
+    document.getElementById('public-nav').classList.toggle('hidden', panel !== 'guest');
+    document.getElementById('public-nav').classList.toggle('flex', panel === 'guest');
+    document.getElementById('student-bottom-nav').classList.toggle('hidden', panel !== 'student');
+    document.getElementById('admin-bottom-nav').classList.toggle('hidden', panel !== 'admin');
+    document.getElementById('admin-bottom-nav').classList.toggle('flex', panel === 'admin');
+
+    // Swap identity chip content to reflect the active panel's persona.
+    const nameEl = document.getElementById('identity-name');
+    const initialsEl = document.getElementById('identity-initials');
+    if (panel === 'admin') {
+      nameEl.textContent = 'Nasrin Chowdhury';
+      initialsEl.textContent = 'NC';
+    } else if (panel === 'student') {
+      nameEl.textContent = 'Rahim Uddin';
+      initialsEl.textContent = 'RU';
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.toggle('bg-primary-light', btn.dataset.viewBtn === viewName);
+      btn.classList.toggle('text-primary', btn.dataset.viewBtn === viewName);
+      btn.classList.toggle('text-slate-600', btn.dataset.viewBtn !== viewName);
+    });
+    document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+      btn.classList.toggle('text-primary', btn.dataset.viewBtn === viewName);
+      btn.classList.toggle('text-slate-400', btn.dataset.viewBtn !== viewName);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('[data-view-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.roleTab === 'admin') setLoginRole('admin');
+      switchView(btn.dataset.viewBtn);
+    });
+  });
+  switchView('landing');
+
+  /**
+   * Toggles the Student/Admin tab on the login screen, adjusting the
+   * identifier label and hiding the "Sign up" hint for Admin (since
+   * admin accounts are provisioned internally, not self-registered).
+   */
+  let activeLoginRole = 'student';
+  function setLoginRole(role) {
+    activeLoginRole = role;
+    const studentTab = document.getElementById('tab-role-student');
+    const adminTab = document.getElementById('tab-role-admin');
+    const registerHint = document.getElementById('login-register-hint');
+    const identifierLabel = document.getElementById('login-identifier-label');
+
+    studentTab.classList.toggle('bg-white', role === 'student');
+    studentTab.classList.toggle('shadow-sm', role === 'student');
+    studentTab.classList.toggle('text-primary', role === 'student');
+    studentTab.classList.toggle('text-slate-500', role !== 'student');
+
+    adminTab.classList.toggle('bg-white', role === 'admin');
+    adminTab.classList.toggle('shadow-sm', role === 'admin');
+    adminTab.classList.toggle('text-primary', role === 'admin');
+    adminTab.classList.toggle('text-slate-500', role !== 'admin');
+
+    registerHint.classList.toggle('hidden', role === 'admin');
+    identifierLabel.textContent = role === 'admin' ? 'Admin Email' : 'Phone Number';
+  }
+  document.getElementById('tab-role-student').addEventListener('click', () => setLoginRole('student'));
+  document.getElementById('tab-role-admin').addEventListener('click', () => setLoginRole('admin'));
+
+  /**
+   * Login form — prototype-only validation. Routes to the Student
+   * or Admin dashboard depending on the active tab. Real admin auth
+   * would additionally require a second factor before reaching this
+   * success branch.
+   */
+  document.getElementById('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const identifier = document.getElementById('login-phone').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errorBox = document.getElementById('login-error');
+
+    const identifierValid = activeLoginRole === 'admin' ? identifier.includes('@') : identifier.length >= 11;
+    if (!identifierValid || password.length < 4) {
+      errorBox.textContent = activeLoginRole === 'admin'
+        ? 'Enter a valid admin email and password to continue.'
+        : 'Enter a valid phone number and password to continue.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    errorBox.classList.add('hidden');
+    switchView(activeLoginRole === 'admin' ? 'admin-dashboard' : 'dashboard');
+  });
+
+  /**
+   * Register form — student self-registration only, mirroring the
+   * production Zod schema shape (name, phone, optional email, min-8
+   * password). Routes to login rather than auto-authenticating.
+   */
+  document.getElementById('register-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const errorBox = document.getElementById('register-error');
+
+    if (name.length < 2 || phone.length < 11 || password.length < 8) {
+      errorBox.textContent = 'Please check your name, phone number, and password (min 8 characters).';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    errorBox.classList.add('hidden');
+    setLoginRole('student');
+    switchView('login');
+  });
+
+  /**
+   * Renders the seat grid visualization on the Student reservation
+   * screen — 60 seats total, ~46 filled, current student's seat
+   * highlighted distinctly.
+   */
+  function renderSeatGrid() {
+    const grid = document.getElementById('seat-grid');
+    const total = 60, filled = 46, mySeatIndex = 46;
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      let cls = 'bg-slate-200';
+      if (i === mySeatIndex) cls = 'bg-accent';
+      else if (i < filled) cls = 'bg-primary';
+      html += `<div class="aspect-square rounded-sm ${cls}"></div>`;
+    }
+    grid.innerHTML = html;
+  }
+  renderSeatGrid();
+
+  /** Simplified seat grid reused for the landing page hero visual. */
+  function renderHeroSeatGrid() {
+    const grid = document.getElementById('hero-seat-grid');
+    const total = 60, filled = 46;
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      html += `<div class="aspect-square rounded-sm ${i < filled ? 'bg-primary' : 'bg-slate-200'}"></div>`;
+    }
+    grid.innerHTML = html;
+  }
+  renderHeroSeatGrid();
+
+  /**
+   * Live countdown timer for the seat reservation hold (Student panel).
+   * On reaching zero, disables the payment CTA and reveals the expiry
+   * banner rather than leaving a stale actionable button.
+   */
+  (function initCountdown() {
+    let remaining = 14 * 60 + 59;
+    const display = document.getElementById('countdown-display');
+    const proceedBtn = document.getElementById('btn-proceed-payment');
+    const expiredBanner = document.getElementById('expired-banner');
+
+    const timer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(timer);
+        display.textContent = '00:00';
+        proceedBtn.disabled = true;
+        proceedBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        expiredBanner.classList.remove('hidden');
+        return;
+      }
+      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const s = (remaining % 60).toString().padStart(2, '0');
+      display.textContent = `${m}:${s}`;
+    }, 1000);
+  })();
+
+  /** Payment flow simulation: initiate -> polling -> success (Student panel). */
+  document.getElementById('btn-initiate-payment').addEventListener('click', function () {
+    this.disabled = true;
+    this.textContent = 'Redirecting to bKash…';
+    document.getElementById('payment-polling').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('payment-polling').classList.add('hidden');
+      document.getElementById('payment-success').classList.remove('hidden');
+      this.classList.add('hidden');
+    }, 2800);
+  });
+
+  const MERIT_ROWS = [
+    { rank: 209, name: 'Tania Islam', score: 89.4, status: 'confirmed' },
+    { rank: 210, name: 'Mehedi Hasan', score: 89.2, status: 'seat_reserved' },
+    { rank: 211, name: 'Fatema Akter', score: 89.1, status: 'confirmed' },
+    { rank: 212, name: 'Rahim Uddin (You)', score: 88.9, status: 'seat_reserved', isMe: true },
+    { rank: 213, name: 'Sabbir Ahmed', score: 88.7, status: 'pending' },
+    { rank: 214, name: 'Nusrat Jahan', score: 88.5, status: 'pending' },
+  ];
+  const STATUS_STYLES = {
+    confirmed: 'bg-success-light text-success',
+    seat_reserved: 'bg-accent-light text-accent',
+    pending: 'bg-slate-100 text-slate-500',
+  };
+
+  /**
+   * Renders the live merit list table. Shared row data powers both the
+   * Student view (own rank highlighted) and the Admin view (no highlight,
+   * since no single row is "the" admin's own).
+   *
+   * @param {string} targetId DOM id of the <tbody> to populate.
+   * @param {boolean} highlightSelf Whether to visually mark the row where isMe is true.
+   */
+  function renderMeritTable(targetId, highlightSelf) {
+    document.getElementById(targetId).innerHTML = MERIT_ROWS.map(r => `
+      <tr class="${highlightSelf && r.isMe ? 'bg-primary-light' : ''}">
+        <td class="px-4 py-3 font-semibold">#${r.rank}</td>
+        <td class="px-4 py-3 ${highlightSelf && r.isMe ? 'font-semibold text-primary' : ''}">${r.name}</td>
+        <td class="px-4 py-3 tabular-nums">${r.score}</td>
+        <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[r.status]}">${r.status.replace('_', ' ')}</span></td>
+      </tr>
+    `).join('');
+  }
+  renderMeritTable('merit-rows', true);
+  renderMeritTable('admin-merit-rows', false);
+
+  // "Updated Xs ago" ticker for the Student live merit list.
+  (function initMeritTicker() {
+    let seconds = 0;
+    const el = document.getElementById('merit-updated-seconds');
+    setInterval(() => {
+      seconds += 1;
+      if (seconds > 12) seconds = 0;
+      el.textContent = seconds;
+    }, 1000);
+  })();
+
+  // Admit card ready-state simulation toggle (Student panel).
+  document.getElementById('btn-simulate-ready').addEventListener('click', () => {
+    document.getElementById('admitcard-pending').classList.add('hidden');
+    document.getElementById('admitcard-ready').classList.remove('hidden');
+  });
+
+  /**
+   * Renders quota fill-rate bars on the Admin overview screen — a
+   * simpler bar representation than the seat-grid squares, since this
+   * view aggregates across programs rather than showing one contested
+   * pool of seats.
+   */
+  function renderAdminQuotaBars() {
+    const quotas = [
+      { program: 'CSE — General', filled: 46, total: 60 },
+      { program: 'EEE — General', filled: 52, total: 55 },
+      { program: 'CSE — Freedom Fighter', filled: 3, total: 5 },
+      { program: 'Civil Engineering — General', filled: 28, total: 50 },
+    ];
+    document.getElementById('admin-quota-bars').innerHTML = quotas.map(q => {
+      const pct = Math.round((q.filled / q.total) * 100);
+      const barColor = pct >= 95 ? 'bg-danger' : pct >= 75 ? 'bg-accent' : 'bg-primary';
+      return `
+        <div>
+          <div class="flex justify-between text-xs mb-1.5">
+            <span class="font-medium text-slate-700">${q.program}</span>
+            <span class="text-slate-400">${q.filled} / ${q.total}</span>
+          </div>
+          <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  renderAdminQuotaBars();
+
+  /** Renders the Admin applications review table with per-row actions. */
+  function renderAdminApplications() {
+    const rows = [
+      { name: 'Tania Islam', program: 'CSE', quota: 'General', status: 'confirmed' },
+      { name: 'Mehedi Hasan', program: 'EEE', quota: 'General', status: 'seat_reserved' },
+      { name: 'Rahim Uddin', program: 'CSE', quota: 'General', status: 'payment_pending' },
+      { name: 'Sabbir Ahmed', program: 'CSE', quota: 'Freedom Fighter', status: 'expired' },
+      { name: 'Nusrat Jahan', program: 'Civil Engineering', quota: 'General', status: 'seat_reserved' },
+    ];
+    document.getElementById('admin-applications-rows').innerHTML = rows.map(r => `
+      <tr>
+        <td class="px-4 py-3 font-medium">${r.name}</td>
+        <td class="px-4 py-3 text-slate-500">${r.program}</td>
+        <td class="px-4 py-3 text-slate-500">${r.quota}</td>
+        <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[r.status] || 'bg-danger-light text-danger'}">${r.status.replace('_', ' ')}</span></td>
+        <td class="px-4 py-3"><button class="text-xs font-semibold text-primary hover:underline">View</button></td>
+      </tr>
+    `).join('');
+  }
+  renderAdminApplications();
+
+  document.querySelectorAll('.status-filter').forEach(btn => {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.status-filter').forEach(b => {
+        b.classList.remove('bg-primary', 'text-white');
+        b.classList.add('bg-surface', 'border', 'border-slate-200', 'text-slate-600');
+      });
+      this.classList.add('bg-primary', 'text-white');
+      this.classList.remove('bg-surface', 'border', 'border-slate-200', 'text-slate-600');
+    });
+  });
+
+  /** Renders the Admin seat quota management table. */
+  function renderAdminQuotaRows() {
+    const quotas = [
+      { type: 'General', filled: 46, total: 60 },
+      { type: 'Freedom Fighter', filled: 3, total: 5 },
+      { type: 'Tribal', filled: 2, total: 4 },
+      { type: 'District Quota', filled: 8, total: 10 },
+      { type: 'Physically Challenged', filled: 1, total: 3 },
+    ];
+    document.getElementById('admin-quota-rows').innerHTML = quotas.map(q => {
+      const pct = Math.round((q.filled / q.total) * 100);
+      return `
+        <tr>
+          <td class="px-4 py-3 font-medium">${q.type}</td>
+          <td class="px-4 py-3 tabular-nums">${q.filled} / ${q.total}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <div class="h-1.5 w-20 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full" style="width:${pct}%"></div>
+              </div>
+              <span class="text-xs text-slate-500">${pct}%</span>
+            </div>
+          </td>
+          <td class="px-4 py-3"><button class="text-xs font-semibold text-primary hover:underline">Edit</button></td>
+        </tr>`;
+    }).join('');
+  }
+  renderAdminQuotaRows();
+
+  /**
+   * Renders the Admin payment verification queue. "Verify" and "Reject"
+   * remove the row from the queue in this prototype — a real system
+   * would instead transition the underlying payment's status and let
+   * the queue re-filter on next fetch.
+   */
+  function renderAdminPayments() {
+    const rows = [
+      { name: 'Sabbir Ahmed', provider: 'bKash', amount: '৳ 2,450.00', status: 'pending' },
+      { name: 'Nusrat Jahan', provider: 'Nagad', amount: '৳ 2,450.00', status: 'pending' },
+      { name: 'Fatema Akter', provider: 'Rocket', amount: '৳ 1,850.00', status: 'pending' },
+    ];
+    document.getElementById('admin-payments-rows').innerHTML = rows.map((r, i) => `
+      <tr data-row-index="${i}">
+        <td class="px-4 py-3 font-medium">${r.name}</td>
+        <td class="px-4 py-3 text-slate-500">${r.provider}</td>
+        <td class="px-4 py-3 tabular-nums">${r.amount}</td>
+        <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-light text-accent">pending</span></td>
+        <td class="px-4 py-3 space-x-3">
+          <button class="verify-payment-btn text-xs font-semibold text-success hover:underline">Verify</button>
+          <button class="reject-payment-btn text-xs font-semibold text-danger hover:underline">Reject</button>
+        </td>
+      </tr>
+    `).join('');
+
+    document.querySelectorAll('.verify-payment-btn, .reject-payment-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        this.closest('tr').remove();
+      });
+    });
+  }
+  renderAdminPayments();
+
+  // Admin: recalculate merit list — re-renders the table and shows a
+  // transient confirmation, simulating the async recalculation job.
+  document.getElementById('btn-recalculate-merit').addEventListener('click', function () {
+    this.disabled = true;
+    const originalText = this.textContent;
+    this.textContent = 'Recalculating…';
+    setTimeout(() => {
+      renderMeritTable('admin-merit-rows', false);
+      document.getElementById('recalc-confirm').classList.remove('hidden');
+      this.disabled = false;
+      this.textContent = originalText;
+      setTimeout(() => document.getElementById('recalc-confirm').classList.add('hidden'), 4000);
+    }, 1200);
+  });
+
+  // Admin: broadcast notification confirmation toggle.
+  document.getElementById('btn-send-broadcast').addEventListener('click', function () {
+    document.getElementById('broadcast-confirm').classList.remove('hidden');
+    setTimeout(() => document.getElementById('broadcast-confirm').classList.add('hidden'), 4000);
+  });
+</script>
+</body>
+</html>

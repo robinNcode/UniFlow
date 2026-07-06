@@ -4,15 +4,20 @@ import type { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requireRole?: 'student' | 'admin';
 }
 
 /**
  * ProtectedRoute — redirects unauthenticated users to /login
  * with the current path preserved as a returnTo query param
  * so they're sent back after successful authentication.
+ * If requireRole is provided, ensures the user has that role.
  */
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+export default function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
+  const { isAuthenticated, user } = useAuthStore((s) => ({
+    isAuthenticated: s.isAuthenticated,
+    user: s.user,
+  }));
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -22,6 +27,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         replace
       />
     );
+  }
+
+  if (requireRole && user?.role !== requireRole) {
+    // If authenticated but wrong role, send them to their respective dashboard
+    return <Navigate to={user?.role === 'admin' ? '/admin' : '/dashboard'} replace />;
   }
 
   return <>{children}</>;

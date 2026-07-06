@@ -7,17 +7,13 @@ import { persist } from 'zustand/middleware';
  * Server data lives in React Query cache, not here.
  */
 
-interface StudentProfile {
-  id: string;
-  fullName: string;
-  phone: string;
-}
+import type { UserProfile } from '@/api/types/common.types';
 
 interface AuthState {
   token: string | null;
-  student: StudentProfile | null;
+  user: UserProfile | null;
   isAuthenticated: boolean;
-  setAuth: (token: string, student: StudentProfile) => void;
+  setAuth: (token: string, user: UserProfile) => void;
   logout: () => void;
 }
 
@@ -25,20 +21,20 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
-      student: null,
+      user: null,
       isAuthenticated: false,
 
-      setAuth: (token, student) =>
+      setAuth: (token, user) =>
         set({
           token,
-          student,
+          user,
           isAuthenticated: true,
         }),
 
       logout: () =>
         set({
           token: null,
-          student: null,
+          user: null,
           isAuthenticated: false,
         }),
     }),
@@ -46,7 +42,7 @@ export const useAuthStore = create<AuthState>()(
       name: 'uniflow-auth',
       partialize: (state) => ({
         token: state.token,
-        student: state.student,
+        user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
     }

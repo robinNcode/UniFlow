@@ -16,37 +16,36 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const inputId = useId();
 
+    const inputBase = [
+      'flex w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm transition-all shadow-sm',
+      'file:border-0 file:bg-transparent file:text-sm file:font-medium',
+      'placeholder:text-slate-400',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary',
+      'disabled:cursor-not-allowed disabled:opacity-50',
+    ].join(' ');
+
+    const inputBorder = error
+      ? 'border-danger focus-visible:border-danger focus-visible:ring-danger/20'
+      : 'border-slate-200 hover:border-slate-300';
+
     return (
-      <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
+      <div className={`${fullWidth ? 'w-full' : ''} ${className} flex flex-col space-y-1.5`}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className="block text-sm font-medium text-text-primary mb-1.5"
-          >
-            {label} {props.required && <span className="text-danger ml-0.5">*</span>}
+          <label htmlFor={inputId} className="text-sm font-semibold text-slate-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {label}
+            {props.required && <span className="text-danger ml-1">*</span>}
           </label>
         )}
-        <div className="relative">
+        <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
+            <div className="absolute left-3 flex h-full items-center justify-center text-slate-400 pointer-events-none">
               {leftIcon}
             </div>
           )}
           <input
             ref={ref}
             id={inputId}
-            className={`
-              block w-full rounded-xl border border-border bg-white px-4 py-3 h-12
-              text-sm text-text-primary shadow-sm
-              placeholder:text-text-muted
-              transition-all duration-200 ease-in-out
-              hover:border-primary/50
-              focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary
-              disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-text-muted disabled:border-border-light
-              ${leftIcon ? 'pl-11' : ''}
-              ${rightIcon ? 'pr-11' : ''}
-              ${error ? 'border-danger bg-danger-light/10 focus:border-danger focus:ring-danger/20 hover:border-danger' : ''}
-            `}
+            className={`${inputBase} ${inputBorder} ${leftIcon ? 'pl-9' : ''} ${rightIcon ? 'pr-9' : ''}`}
             aria-invalid={!!error}
             aria-describedby={
               error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
@@ -54,19 +53,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
+            <div className="absolute right-3 flex h-full items-center justify-center text-slate-400 pointer-events-none">
               {rightIcon}
             </div>
           )}
         </div>
-        {(error || helperText) && (
-          <p
-            id={error ? `${inputId}-error` : `${inputId}-helper`}
-            className={`mt-1.5 text-xs font-medium animate-slide-down ${
-              error ? 'text-danger' : 'text-text-secondary'
-            }`}
-          >
-            {error || helperText}
+        {error && (
+          <p id={`${inputId}-error`} role="alert" className="text-[0.8rem] font-medium text-danger animate-fade-in">
+            {error}
+          </p>
+        )}
+        {helperText && !error && (
+          <p id={`${inputId}-helper`} className="text-[0.8rem] text-slate-500">
+            {helperText}
           </p>
         )}
       </div>

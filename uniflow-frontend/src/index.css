@@ -4,6 +4,7 @@
   /* Primary palette — institutional trust */
   --color-primary: #0F4C5C;
   --color-primary-hover: #0B3A47;
+  --color-primary-dark: #082E38;
   --color-primary-light: #E0F2F1;
 
   /* Accent — urgency / CTAs */
@@ -14,28 +15,28 @@
   /* Semantic */
   --color-success: #15803D;
   --color-success-light: #DCFCE7;
-  --color-danger: #B91C1C;
+  --color-danger: #DC2626;
   --color-danger-light: #FEE2E2;
   --color-warning: #D97706;
-  --color-warning-light: #FEF3C7;
+  --color-warning-light: #FEF9C3;
   --color-info: #0369A1;
   --color-info-light: #E0F2FE;
 
   /* Neutrals */
-  --color-background: #F8FAFC;
+  --color-background: #F1F5F9;
   --color-surface: #FFFFFF;
   --color-text-primary: #0F172A;
-  --color-text-secondary: #64748B;
+  --color-text-secondary: #475569;
   --color-text-muted: #94A3B8;
-  --color-border: #E2E8F0;
-  --color-border-light: #F1F5F9;
+  --color-border: #CBD5E1;
+  --color-border-light: #E2E8F0;
 
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-bengali: 'Noto Sans Bengali', 'Inter', sans-serif;
 
   /* Animations */
-  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-fade-in: fade-in 0.35s ease-out;
   --animate-slide-up: slide-up 0.3s ease-out;
   --animate-slide-down: slide-down 0.2s ease-out;
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
@@ -45,23 +46,23 @@
 
 /* Keyframes */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-down {
-  from { opacity: 0; transform: translateY(-12px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
+  50% { opacity: 0.5; transform: scale(1.4); }
 }
 
 @keyframes skeleton {
@@ -70,21 +71,22 @@
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.94); }
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Base styles */
-* {
+/* Base reset */
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
 }
 
 body {
@@ -100,27 +102,15 @@ body {
 }
 
 /* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-text-muted);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
 /* Focus ring utility */
 .focus-ring {
-  @apply outline-none ring-2 ring-primary/30 ring-offset-2;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.2);
 }
 
 /* Gradient text */
@@ -133,20 +123,41 @@ body {
 
 /* Glass card effect */
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 /* Sticky bottom action bar for mobile */
 .sticky-bottom-bar {
-  position: sticky;
-  bottom: 0;
+  position: fixed;
+  bottom: 64px; /* above mobile nav */
   left: 0;
   right: 0;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid var(--color-border);
-  z-index: 40;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-border-light);
+  z-index: 30;
+}
+
+/* Auth split-layout panel — ensures the left panel fills viewport height */
+.auth-panel-left {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .auth-panel-left {
+    display: flex;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow: hidden;
+  }
+}
+
+/* Form field group spacing */
+.form-stack > * + * {
+  margin-top: 1.25rem;
 }
