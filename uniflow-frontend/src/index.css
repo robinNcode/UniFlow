@@ -4,27 +4,26 @@
   /* Primary palette — institutional trust */
   --color-primary: #0F4C5C;
   --color-primary-hover: #0B3A47;
-  --color-primary-dark: #082E38;
-  --color-primary-light: #E0F2F1;
+  --color-primary-light: #E6EEEF;
 
   /* Accent — urgency / CTAs */
   --color-accent: #D97706;
-  --color-accent-hover: #B45309;
-  --color-accent-light: #FEF3C7;
+  --color-accent-light: #FEF3E2;
 
   /* Semantic */
   --color-success: #15803D;
-  --color-success-light: #DCFCE7;
-  --color-danger: #DC2626;
-  --color-danger-light: #FEE2E2;
+  --color-success-light: #E8F5EC;
+  --color-danger: #B91C1C;
+  --color-danger-light: #FBEAEA;
   --color-warning: #D97706;
   --color-warning-light: #FEF9C3;
   --color-info: #0369A1;
   --color-info-light: #E0F2FE;
 
   /* Neutrals */
-  --color-background: #F1F5F9;
+  --color-background: #F8FAFC;
   --color-surface: #FFFFFF;
+  --color-canvas: #F8FAFC;
   --color-text-primary: #0F172A;
   --color-text-secondary: #475569;
   --color-text-muted: #94A3B8;

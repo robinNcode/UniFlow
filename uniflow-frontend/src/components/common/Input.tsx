@@ -20,13 +20,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       'flex w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm transition-all shadow-sm',
       'file:border-0 file:bg-transparent file:text-sm file:font-medium',
       'placeholder:text-slate-400',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary',
       'disabled:cursor-not-allowed disabled:opacity-50',
     ].join(' ');
 
     const inputBorder = error
       ? 'border-danger focus-visible:border-danger focus-visible:ring-danger/20'
-      : 'border-slate-200 hover:border-slate-300';
+      : 'border-slate-300 hover:border-slate-400';
 
     return (
       <div className={`${fullWidth ? 'w-full' : ''} ${className} flex flex-col space-y-1.5`}>
