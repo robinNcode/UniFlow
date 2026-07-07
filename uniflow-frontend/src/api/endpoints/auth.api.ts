@@ -1,45 +1,14 @@
-import { axiosInstance } from '@/api/axiosInstance'
-import type { Student } from '@/api/types/application.types'
-import { normalizeBdPhoneNumber } from '@/utils/phoneValidation'
-
-export interface LoginRequest {
-    phone: string
-    password: string
-}
-
-export interface LoginResponse {
-    token: string
-    student: Pick<Student, 'id' | 'fullName' | 'phone'>
-}
-
-export interface RegisterRequest {
-    fullName: string
-    phone: string
-    email?: string
-    password: string
-}
-
-export interface RegisterResponse {
-    message: string
-    studentId: string
-}
+import { axiosInstance } from '../axiosInstance';
+import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/common.types';
 
 export const authApi = {
-    login: async (data: LoginRequest): Promise<LoginResponse> => {
-        const normalized = normalizeBdPhoneNumber(data.phone) ?? data.phone
-        const response = await axiosInstance.post<LoginResponse>('/auth/login', {
-            ...data,
-            phone: normalized,
-        })
-        return response.data
-    },
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    const response = await axiosInstance.post<AuthResponse>('/auth/login', data);
+    return response.data;
+  },
 
-    register: async (data: RegisterRequest): Promise<RegisterResponse> => {
-        const normalized = normalizeBdPhoneNumber(data.phone) ?? data.phone
-        const response = await axiosInstance.post<RegisterResponse>('/auth/register', {
-            ...data,
-            phone: normalized,
-        })
-        return response.data
-    },
-}
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+    const response = await axiosInstance.post<AuthResponse>('/auth/register', data);
+    return response.data;
+  },
+};

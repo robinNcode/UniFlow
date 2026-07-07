@@ -28,8 +28,18 @@ export const registerSchema = z.object({
         ),
     email: z.string().email('Enter a valid email address').optional().or(z.literal('')),
     password: z.string().min(8, 'Password must be at least 8 characters'),
-})
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Passwords do not match',
+            path: ['confirmPassword'],
+        });
+    }
+});
 
 export type LoginFormData = z.infer<typeof loginSchema>
 export type AdminLoginFormData = z.infer<typeof adminLoginSchema>
 export type RegisterFormData = z.infer<typeof registerSchema>
+

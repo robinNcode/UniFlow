@@ -1,27 +1,64 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { UserProfile } from '@/api/types/common.types';
+
+/**
+ * Auth store — Zustand
+ * Holds JWT token and current user profile only.
+ * Server data lives in React Query cache, not here.
+ */
 
 interface AuthState {
-    token: string | null
-    student: {
-        id: string
-        fullName: string
-        phone: string
-    } | null
-    setAuth: (token: string, student: AuthState['student']) => void
-    clearAuth: () => void
+    token: string | null;
+    user: UserProfile | null;
+    isAuthenticated: boolean;
+    setAuth: (token: string, user: UserProfile) => void;
+    logout: () => void;
+    // Legacy compatibility — student is an alias for user
+    student: UserProfile | null;
+    clearAuth: () => void;
 }
 
-// Token and minimal student profile only — server data lives in React Query cache.
-// Persisted to localStorage so sessions survive page refreshes.
 export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
             token: null,
+            user: null,
             student: null,
-            setAuth: (token, student) => set({ token, student }),
-            clearAuth: () => set({ token: null, student: null }),
+            isAuthenticated: false,
+
+            setAuth: (token, user) =>
+                set({
+                    token,
+                    user,
+                    student: user,
+                    isAuthenticated: true,
+                }),
+
+            logout: () =>
+                set({
+                    token: null,
+                    user: null,
+                    student: null,
+                    isAuthenticated: false,
+                }),
+
+            clearAuth: () =>
+                set({
+                    token: null,
+                    user: null,
+                    student: null,
+                    isAuthenticated: false,
+                }),
         }),
-        { name: 'auth-storage' },
+        {
+            name: 'uniflow-auth',
+            partialize: (state) => ({
+                token: state.token,
+                user: state.user,
+                student: state.user,
+                isAuthenticated: state.isAuthenticated,
+            }),
+        },
     ),
-)
+);

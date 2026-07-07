@@ -1,38 +1,31 @@
+
+
 interface SkeletonProps {
-    className?: string
-    rows?: number
+  height?: string;
+  width?: string;
+  className?: string;
 }
 
-export function Skeleton({ className = '' }: Omit<SkeletonProps, 'rows'>) {
-    return (
-        <div
-            className={`bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%] animate-skeleton-shimmer rounded ${className}`}
-            aria-hidden
-        />
-    )
+export function Skeleton({ height = '20px', width = '100%', className = '' }: SkeletonProps) {
+  return (
+    <div
+      className={`bg-slate-200 animate-pulse rounded-md ${className}`}
+      style={{ height, width }}
+    />
+  );
 }
 
 export function SkeletonCard() {
-    return (
-        <div className="bg-surface border border-slate-200 rounded-xl p-5 space-y-3" aria-label="Loading…">
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-6 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-        </div>
-    )
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-5 w-full flex gap-4">
+      <Skeleton width="40px" height="40px" className="rounded-xl shrink-0" />
+      <div className="flex-1 space-y-2">
+        <Skeleton width="40%" height="20px" />
+        <Skeleton width="30%" height="16px" />
+      </div>
+      <Skeleton width="60px" height="24px" className="rounded-full shrink-0" />
+    </div>
+  );
 }
 
-export function SkeletonTableRows({ rows = 5 }: { rows?: number }) {
-    return (
-        <>
-            {Array.from({ length: rows }).map((_, i) => (
-                <tr key={i} aria-hidden>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-8" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                </tr>
-            ))}
-        </>
-    )
-}
+export default Skeleton;

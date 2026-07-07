@@ -15,7 +15,7 @@ SET NAMES utf8mb4;
 -- UNIVERSITIES
 -- ============================================================
 CREATE TABLE universities (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(255) NOT NULL,
     short_name      VARCHAR(50)  NOT NULL,
     domain          VARCHAR(100),
@@ -29,7 +29,7 @@ CREATE TABLE universities (
 -- PROGRAMS
 -- ============================================================
 CREATE TABLE programs (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     university_id   CHAR(36) NOT NULL,
     name            VARCHAR(255) NOT NULL,
     code            VARCHAR(50)  NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE programs (
 -- ADMISSION CYCLES
 -- ============================================================
 CREATE TABLE admission_cycles (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     program_id      CHAR(36) NOT NULL,
     title           VARCHAR(255) NOT NULL,
     opens_at        DATETIME NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE admission_cycles (
 -- SEAT QUOTAS
 -- ============================================================
 CREATE TABLE seat_quotas (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     cycle_id        CHAR(36) NOT NULL,
     quota_type      ENUM('general', 'freedom_fighter', 'tribal', 'district_quota', 'physically_challenged') NOT NULL,
     total_seats     INT NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE seat_quotas (
 -- STUDENTS
 -- ============================================================
 CREATE TABLE students (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     phone           VARCHAR(20) NOT NULL,
     email           VARCHAR(255),
     full_name       VARCHAR(255) NOT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE applications (
 -- SEAT RESERVATIONS
 -- ============================================================
 CREATE TABLE seat_reservations (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     application_id  CHAR(36) NOT NULL,
     reserved_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at      DATETIME NOT NULL,
@@ -163,7 +163,7 @@ CREATE TABLE payments (
 -- ADMIT CARDS
 -- ============================================================
 CREATE TABLE admit_cards (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     application_id  CHAR(36) NOT NULL,
     pdf_path        VARCHAR(500) NOT NULL,
     roll_number     VARCHAR(50) NOT NULL,
@@ -179,7 +179,7 @@ CREATE TABLE admit_cards (
 -- NOTIFICATION LOGS
 -- ============================================================
 CREATE TABLE notification_logs (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     application_id  CHAR(36),
     student_id      CHAR(36) NOT NULL,
     channel         ENUM('sms', 'email', 'push') NOT NULL,
@@ -199,7 +199,7 @@ CREATE TABLE notification_logs (
 -- OUTBOX EVENTS
 -- ============================================================
 CREATE TABLE outbox_events (
-    id              CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     event_type      VARCHAR(100) NOT NULL,
     aggregate_id    CHAR(36) NOT NULL,
     payload         JSON NOT NULL,
