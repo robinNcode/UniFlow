@@ -1,0 +1,202 @@
+{
+  "common": {
+    "appName": "UniFlow",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "search": "Search",
+    "noResults": "No results found",
+    "required": "This field is required",
+    "connectionIssue": "Connection issue — data may be outdated",
+    "updated": "Updated {{time}} ago",
+    "live": "Live"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your UniFlow account",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+880 1XXXXXXXXX",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "cta": "Sign In",
+      "noAccount": "Don't have an account?",
+      "register": "Create Account"
+    },
+    "register": {
+      "title": "Create Your Account",
+      "subtitle": "Start your university admission journey",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+880 1XXXXXXXXX",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "cta": "Create Account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign In"
+    },
+    "sessionExpired": {
+      "title": "Session Expired",
+      "message": "Your session has expired. Please log in again to continue.",
+      "cta": "Back to Login"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {{name}}",
+    "subtitle": "Manage your admission applications",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "noApplications": "You haven't submitted any applications yet.",
+    "startApplication": "Browse Programs",
+    "applicationStatus": "Application Status",
+    "meritListRank": "Merit List Rank",
+    "paymentStatus": "Payment Status"
+  },
+  "programs": {
+    "title": "Available Programs",
+    "subtitle": "Browse and apply to university programs",
+    "search": "Search programs...",
+    "filter": "Filter",
+    "apply": "Apply Now",
+    "details": "View Details",
+    "seats": "{{count}} seats available",
+    "deadline": "Deadline: {{date}}",
+    "noPrograms": "No programs available at this time."
+  },
+  "application": {
+    "title": "Application Form",
+    "steps": {
+      "personal": "Personal Information",
+      "academic": "Academic History",
+      "quota": "Quota Selection",
+      "review": "Review & Submit"
+    },
+    "personal": {
+      "fullName": "Full Name",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "dateOfBirth": "Date of Birth",
+      "fatherName": "Father's Name",
+      "motherName": "Mother's Name",
+      "address": "Present Address"
+    },
+    "academic": {
+      "sscGpa": "SSC GPA",
+      "hscGpa": "HSC GPA",
+      "boardName": "Board Name",
+      "passingYear": "Passing Year"
+    },
+    "quota": {
+      "title": "Quota Selection",
+      "type": "Quota Type",
+      "general": "General",
+      "freedomFighter": "Freedom Fighter",
+      "tribal": "Tribal",
+      "districtQuota": "District Quota",
+      "physicallyChallenged": "Physically Challenged",
+      "supportingDocument": "Supporting Document",
+      "documentRequired": "Supporting document is required for non-general quotas"
+    },
+    "review": {
+      "title": "Review Your Application",
+      "submitCta": "Submit Application",
+      "confirmMessage": "Please review all information carefully before submitting."
+    },
+    "reserveSeat": {
+      "cta": "Reserve Seat",
+      "reserving": "Reserving...",
+      "reserved": "Seat Reserved",
+      "expired": "Reservation Expired",
+      "expiredMessage": "Your seat reservation has expired. The seat has been released.",
+      "retryMessage": "You may attempt to reserve a seat again if availability permits.",
+      "retryCta": "Try Again",
+      "timeRemaining": "Time Remaining",
+      "proceedPayment": "Proceed to Payment",
+      "quotaExhausted": "Quota Full",
+      "quotaExhaustedMessage": "No seats remaining in {{quota}} quota for this program."
+    },
+    "status": {
+      "title": "Application Status",
+      "pending": "Pending",
+      "seatReserved": "Seat Reserved",
+      "paymentPending": "Payment Pending",
+      "confirmed": "Confirmed",
+      "expired": "Expired",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    }
+  },
+  "payment": {
+    "title": "Payment",
+    "initiate": {
+      "title": "Complete Payment",
+      "subtitle": "Secure your admission seat by completing payment",
+      "amount": "Amount Due",
+      "deadline": "Payment Deadline",
+      "cta": "Proceed to Payment",
+      "processing": "Processing..."
+    },
+    "status": {
+      "title": "Payment Status",
+      "pending": "Payment Processing",
+      "pendingMessage": "Your payment is being verified. This may take a few minutes.",
+      "confirmed": "Payment Confirmed",
+      "confirmedMessage": "Your payment has been successfully verified.",
+      "failed": "Payment Failed",
+      "failedMessage": "Your payment could not be verified. Please try again or contact support.",
+      "checkLater": "If verification is taking too long, please check back later or contact support.",
+      "contactSupport": "Contact Support"
+    }
+  },
+  "meritList": {
+    "title": "Live Merit List",
+    "subtitle": "Real-time admission merit rankings",
+    "rank": "Rank",
+    "studentId": "Student ID",
+    "score": "Merit Score",
+    "status": "Status",
+    "quota": "Quota",
+    "totalCandidates": "Total Candidates: {{count}}",
+    "yourRank": "Your Rank: #{{rank}}",
+    "filterByQuota": "Filter by Quota",
+    "allQuotas": "All Quotas"
+  },
+  "admitCard": {
+    "title": "Admit Card",
+    "download": "Download Admit Card",
+    "downloading": "Downloading...",
+    "rollNumber": "Roll Number",
+    "examDate": "Exam Date",
+    "generating": "Generating Admit Card",
+    "generatingMessage": "Your admit card is being generated. This may take a few moments.",
+    "refreshCta": "Check Again",
+    "notAvailable": "Admit card is not yet available. Please check back after your payment is confirmed."
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page Not Found",
+      "message": "The page you're looking for doesn't exist or has been moved.",
+      "cta": "Go to Dashboard"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "programs": "Programs",
+    "applications": "Applications",
+    "meritList": "Merit List",
+    "admitCard": "Admit Card",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "logout": "Sign Out"
+  }
+}

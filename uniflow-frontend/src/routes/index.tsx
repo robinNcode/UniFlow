@@ -18,7 +18,6 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: (
-                    // Redirect root to dashboard if logged in, else login
                     <IndexRedirect />
                 ),
             },
