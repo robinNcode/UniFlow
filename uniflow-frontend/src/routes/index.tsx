@@ -30,11 +30,11 @@ const wrap = (C: React.LazyExoticComponent<() => React.ReactElement>) => (
 // ─── Lazy page imports ───────────────────────────────────────────────────────
 // Landing / Public
 const LandingPage       = lazy(() => import('@/pages/landing/LandingPage'));
-const LoginPage         = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage ?? m.default })));
+const LoginPage         = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage      = lazy(() => import('@/pages/auth/RegisterPage'));
 
 // Student pages
-const StudentDashboard  = lazy(() => import('@/pages/dashboard/StudentDashboardPage').then(m => ({ default: m.StudentDashboardPage ?? m.default })));
+const StudentDashboard  = lazy(() => import('@/pages/dashboard/StudentDashboardPage'));
 const SeatReservation   = lazy(() => import('@/pages/application/SeatReservationPage'));
 const PaymentInitiate   = lazy(() => import('@/pages/payment/PaymentInitiatePage'));
 const LiveMeritList     = lazy(() => import('@/pages/merit-list/LiveMeritListPage'));

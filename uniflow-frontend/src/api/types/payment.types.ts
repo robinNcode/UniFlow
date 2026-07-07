@@ -1,24 +1,23 @@
-import type { PaymentProvider, PaymentStatus } from './common.types'
+import type { PaymentStatus } from './common.types';
 
 export interface PaymentInitiateRequest {
-    applicationId: string
-    provider: PaymentProvider
+  applicationId: string;
+  reservationId: string;
 }
 
 export interface PaymentInitiateResponse {
-    paymentId: string
-    redirectUrl?: string
-    provider: PaymentProvider
-    amount: number
-    status: PaymentStatus
+  paymentId: string;
+  amount: number;
+  currency: string;
+  redirectUrl?: string;
+  // TODO: confirm with backend — does the response include MFS provider details?
 }
 
 export interface PaymentStatusResponse {
-    paymentId: string
-    status: PaymentStatus
-    amount: number
-    provider: PaymentProvider
-    providerTxnId?: string
-    initiatedAt: string
-    verifiedAt?: string
+  paymentId: string;
+  status: PaymentStatus;
+  amount: number;
+  currency: string;
+  paidAt?: string;
+  transactionId?: string;
 }

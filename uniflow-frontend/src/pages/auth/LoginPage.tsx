@@ -1,141 +1,80 @@
-import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useAuth } from '@/hooks/useAuth'
-import { loginSchema, adminLoginSchema, type LoginFormData, type AdminLoginFormData } from '@/validators/auth.schema'
-import { Button } from '@/components/common/Button'
-import { Input } from '@/components/common/Input'
-import { Card } from '@/components/common/Card'
-import { useTranslation } from 'react-i18next'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { loginSchema, type LoginFormData } from '@/validators/auth.schema';
+import Input from '@/components/common/Input';
+import Button from '@/components/common/Button';
 
-export function LoginPage() {
-    const [role, setRole] = useState<'student' | 'admin'>('student')
-    const { login } = useAuth()
-    const { t } = useTranslation()
-    const [searchParams] = useSearchParams()
-    const [globalError, setGlobalError] = useState('')
+export default function LoginPage() {
+  const { loginMutation } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const studentForm = useForm<LoginFormData>({
-        resolver: zodResolver(loginSchema),
-        defaultValues: { phone: '', password: '' },
-    })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
-    const adminForm = useForm<AdminLoginFormData>({
-        resolver: zodResolver(adminLoginSchema),
-        defaultValues: { email: '', password: '' },
-    })
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate({ phone: data.phone, password: data.password });
+  };
 
-    // We only mock admin login for the prototype. In reality, it would hit an admin API.
-    const onSubmitStudent = async (data: LoginFormData) => {
-        try {
-            setGlobalError('')
-            const returnTo = searchParams.get('returnTo') || '/dashboard'
-            await login(data.phone, data.password, returnTo)
-        } catch (err) {
-            setGlobalError(err instanceof Error ? err.message : t('errors.generic'))
-        }
-    }
+  return (
+    <div className="max-w-md mx-auto pt-6 md:pt-14 pb-10 animate-fade-in">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Log in to uniFlow</h1>
+        <p className="text-slate-500 text-sm mt-1">Enter your credentials to continue.</p>
+      </div>
 
-    const onSubmitAdmin = (_data: AdminLoginFormData) => {
-        // Prototype mock
-        const returnTo = searchParams.get('returnTo') || '/dashboard'
-        window.location.href = returnTo // In a real app, this would use an admin login API
-    }
+      <div className="flex bg-slate-100 rounded-lg p-1 mb-5 max-w-xs mx-auto">
+        <button className="flex-1 text-sm font-semibold py-2 rounded-md bg-white shadow-sm text-primary">Student</button>
+        <button className="flex-1 text-sm font-semibold py-2 rounded-md text-slate-500">Admin</button>
+      </div>
 
-    return (
-        <div className="max-w-md mx-auto pt-6 md:pt-14 pb-12">
-            <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold">{t('auth.login')}</h1>
-                <p className="text-slate-500 text-sm mt-1">Enter your credentials to continue.</p>
-            </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-surface border border-slate-200 rounded-xl p-6 space-y-4" noValidate>
+        <Input
+          label="Phone Number"
+          placeholder="01XXXXXXXXX"
+          type="tel"
+          autoComplete="tel"
+          error={errors.phone?.message}
+          {...register('phone')}
+          required
+        />
+        <Input
+          label="Password"
+          placeholder="••••••••"
+          type="password"
+          autoComplete="current-password"
+          error={errors.password?.message}
+          {...register('password')}
+          required
+        />
 
-            <div className="flex bg-slate-100 rounded-lg p-1 mb-5 max-w-xs mx-auto">
-                <button
-                    onClick={() => { setRole('student'); setGlobalError(''); studentForm.reset() }}
-                    className={`flex-1 text-sm font-semibold py-2 rounded-md transition ${role === 'student' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                >
-                    {t('auth.studentTab')}
-                </button>
-                <button
-                    onClick={() => { setRole('admin'); setGlobalError(''); adminForm.reset() }}
-                    className={`flex-1 text-sm font-semibold py-2 rounded-md transition ${role === 'admin' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                >
-                    {t('auth.adminTab')}
-                </button>
-            </div>
+        {loginMutation.isError && (
+          <div className="bg-danger-light border border-danger/20 rounded-lg px-3.5 py-2.5 text-xs text-danger font-medium">
+            {loginMutation.error.message}
+          </div>
+        )}
 
-            <Card padding="lg">
-                {role === 'student' ? (
-                    <form onSubmit={studentForm.handleSubmit(onSubmitStudent)} className="space-y-4">
-                        <Input
-                            label={t('auth.phone')}
-                            placeholder={t('auth.phonePlaceholder')}
-                            {...studentForm.register('phone')}
-                            error={studentForm.formState.errors.phone?.message}
-                        />
-                        <Input
-                            label={t('auth.password')}
-                            type="password"
-                            placeholder="••••••••"
-                            {...studentForm.register('password')}
-                            error={studentForm.formState.errors.password?.message}
-                        />
-                        {globalError && (
-                            <div className="bg-danger-light border border-danger/20 rounded-lg p-3 text-xs text-danger font-medium">
-                                {globalError}
-                            </div>
-                        )}
-                        <Button
-                            type="submit"
-                            fullWidth
-                            isLoading={studentForm.formState.isSubmitting}
-                        >
-                            {t('auth.loginCta')}
-                        </Button>
-                    </form>
-                ) : (
-                    <form onSubmit={adminForm.handleSubmit(onSubmitAdmin)} className="space-y-4">
-                        <Input
-                            label={t('auth.adminEmail')}
-                            type="email"
-                            placeholder="admin@example.com"
-                            {...adminForm.register('email')}
-                            error={adminForm.formState.errors.email?.message}
-                        />
-                        <Input
-                            label={t('auth.password')}
-                            type="password"
-                            placeholder="••••••••"
-                            {...adminForm.register('password')}
-                            error={adminForm.formState.errors.password?.message}
-                        />
-                        {globalError && (
-                            <div className="bg-danger-light border border-danger/20 rounded-lg p-3 text-xs text-danger font-medium">
-                                {globalError}
-                            </div>
-                        )}
-                        <Button
-                            type="submit"
-                            fullWidth
-                            isLoading={adminForm.formState.isSubmitting}
-                        >
-                            {t('auth.loginCta')}
-                        </Button>
-                    </form>
-                )}
-            </Card>
+        <Button
+          type="submit"
+          fullWidth
+          className="py-3"
+          isLoading={loginMutation.isPending}
+        >
+          Log In
+        </Button>
+      </form>
 
-            {role === 'student' && (
-                <p className="text-center text-sm text-slate-500 mt-6">
-                    {t('auth.noAccount')}{' '}
-                    <Link to="/register" className="text-primary font-semibold hover:underline">
-                        {t('auth.signUpLink')}
-                    </Link>
-                </p>
-            )}
-        </div>
-    )
+      <p className="text-center text-sm text-slate-500 mt-5">
+        Don't have an account?{' '}
+        <Link to="/register" className="text-primary font-semibold hover:underline">
+          Sign up
+        </Link>
+      </p>
+    </div>
+  );
 }

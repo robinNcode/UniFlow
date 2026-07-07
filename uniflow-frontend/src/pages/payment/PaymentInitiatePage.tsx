@@ -1,84 +1,81 @@
-import { useState } from 'react'
-import { Card } from '@/components/common/Card'
-import { Button } from '@/components/common/Button'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useMutation } from '@tanstack/react-query';
+import { paymentApi } from '@/api/endpoints/payment.api';
+import Card from '@/components/common/Card';
+import Button from '@/components/common/Button';
+import { ArrowRight, Shield, CreditCard } from 'lucide-react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
-type Provider = 'bkash' | 'nagad' | 'rocket'
+export default function PaymentInitiatePage() {
+  const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const applicationId = searchParams.get('applicationId') ?? '';
 
-export function PaymentInitiatePage() {
-    const [provider, setProvider] = useState<Provider>('bkash')
-    const [isPolling, setIsPolling] = useState(false)
-    const [isSuccess, setIsSuccess] = useState(false)
+  const initiateMutation = useMutation({
+    mutationFn: () => paymentApi.initiatePayment({ applicationId, reservationId: '' }),
+    onSuccess: (data) => {
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        toast.success('Payment initiated.');
+        navigate(`/payment/status?paymentId=${data.paymentId}&applicationId=${applicationId}`);
+      }
+    },
+  });
 
-    // Simulation of the payment flow as specified in the prototype
-    const handleInitiate = () => {
-        setIsPolling(true)
+  return (
+    <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-2xl font-bold text-text-primary">{t('payment.initiate.title')}</h1>
+        <p className="text-text-secondary mt-1">{t('payment.initiate.subtitle')}</p>
+      </div>
 
-        // Simulate polling finishing after 3 seconds
-        setTimeout(() => {
-            setIsPolling(false)
-            setIsSuccess(true)
-        }, 3000)
-    }
+      <Card>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 pb-4 border-b border-border">
+            <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center">
+              <CreditCard className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <p className="text-sm text-text-secondary">{t('payment.initiate.amount')}</p>
+              <p className="text-2xl font-bold text-text-primary">৳ 1,500</p>
+            </div>
+          </div>
 
-    return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Payment</h1>
+          <div className="space-y-2.5 text-sm">
+            <div className="flex items-center gap-2 text-text-secondary">
+              <Shield className="h-4 w-4 text-success shrink-0" />
+              <span>Secure payment via bKash / Nagad</span>
+            </div>
+            <div className="flex items-center gap-2 text-text-secondary">
+              <Shield className="h-4 w-4 text-success shrink-0" />
+              <span>Payment verification may take a few minutes</span>
+            </div>
+          </div>
 
-            <Card padding="md" className="space-y-6">
-                <div className="flex justify-between items-center bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <span className="text-sm font-medium text-slate-600">Admission Fee</span>
-                    <span className="font-bold text-lg tabular-nums">৳ 2,450.00</span>
-                </div>
-
-                {!isPolling && !isSuccess && (
-                    <div>
-                        <p className="text-sm font-semibold mb-3">Select payment method</p>
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            {(['bkash', 'nagad', 'rocket'] as const).map((p) => (
-                                <button
-                                    key={p}
-                                    onClick={() => setProvider(p)}
-                                    className={`border-2 rounded-lg py-4 text-xs font-semibold uppercase tracking-wide transition ${provider === p
-                                        ? 'border-primary bg-primary-light text-primary'
-                                        : 'border-slate-200 text-slate-500 hover:border-slate-300 bg-surface'
-                                        }`}
-                                >
-                                    {p}
-                                </button>
-                            ))}
-                        </div>
-
-                        <Button fullWidth size="lg" onClick={handleInitiate}>
-                            Pay ৳ 2,450.00
-                        </Button>
-                    </div>
-                )}
-
-                {isPolling && (
-                    <div className="bg-canvas border border-slate-200 rounded-lg p-5 flex items-center gap-4 animate-in fade-in">
-                        <Loader2 className="w-6 h-6 animate-spin text-primary shrink-0" />
-                        <div>
-                            <p className="text-sm font-semibold text-slate-900">Verifying your payment…</p>
-                            <p className="text-xs text-slate-500 mt-1">This can take up to a minute. Do not close this page.</p>
-                        </div>
-                    </div>
-                )}
-
-                {isSuccess && (
-                    <div className="bg-success-light border border-success/30 rounded-lg p-5 flex items-center gap-4 animate-in fade-in zoom-in duration-300">
-                        <div className="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-success capitalize">Payment Verified</p>
-                            <p className="text-xs text-success/80 mt-1 font-medium">
-                                Your admission is now confirmed. Your admit card is being generated.
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </Card>
+          {initiateMutation.isError && (
+            <div className="px-4 py-3 rounded-xl bg-danger-light border border-danger/20">
+              <p className="text-sm text-danger">{initiateMutation.error.message}</p>
+            </div>
+          )}
         </div>
-    )
+      </Card>
+
+      <div className="sticky-bottom-bar sm:static sm:p-0 sm:bg-transparent sm:border-0">
+        <Button
+          fullWidth
+          size="lg"
+          variant="accent"
+          isLoading={initiateMutation.isPending}
+          onClick={() => initiateMutation.mutate()}
+          rightIcon={<ArrowRight className="h-4 w-4" />}
+        >
+          {initiateMutation.isPending ? t('payment.initiate.processing') : t('payment.initiate.cta')}
+        </Button>
+      </div>
+    </div>
+  );
 }

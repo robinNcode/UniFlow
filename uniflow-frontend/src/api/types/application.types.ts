@@ -1,74 +1,72 @@
-import type { ApplicationStatus, QuotaType } from './common.types'
+import type { ApplicationStatus, QuotaType } from './common.types';
 
-export interface Student {
-    id: string
-    phone: string
-    email?: string
-    fullName: string
-    fatherName?: string
-    motherName?: string
-    dateOfBirth?: string
-    nidOrBirthReg?: string
-    createdAt: string
-    updatedAt: string
+export interface AdmissionCycle {
+  id: string;
+  name: string;
+  opensAt: string;
+  closesAt: string;
+  isActive: boolean;
 }
 
 export interface Program {
-    id: string
-    universityId: string
-    universityName: string
-    name: string
-    code: string
-    durationYears: number
-    isActive: boolean
-}
-
-export interface AdmissionCycle {
-    id: string
-    programId: string
-    title: string
-    opensAt: string
-    closesAt: string
-    meritResultAt?: string
-    isActive: boolean
-}
-
-export interface SeatQuota {
-    id: string
-    cycleId: string
-    quotaType: QuotaType
-    totalSeats: number
-    filledSeats: number
+  id: string;
+  name: string;
+  department: string;
+  description: string;
+  totalSeats: number;
+  availableSeats: number;
+  cycleId: string;
+  requirements: string;
 }
 
 export interface Application {
-    id: string
-    studentId: string
-    cycleId: string
-    quotaId: string
-    quotaType: QuotaType
-    meritScore: number
-    status: ApplicationStatus
-    appliedAt: string
-    confirmedAt?: string
-    program?: Program
-    cycle?: AdmissionCycle
+  id: string;
+  studentId: string;
+  programId: string;
+  programName: string;
+  status: ApplicationStatus;
+  quotaType: QuotaType;
+  submittedAt: string;
+  updatedAt: string;
+  reservationExpiresAt?: string;
+  meritScore?: number;
+  meritRank?: number;
 }
 
-export interface SeatReservation {
-    reservationId: string
-    quotaType: QuotaType
-    expiresAt: string
-    paymentDeadlineMinutes: number
+export interface ApplicationFormData {
+  // Personal info
+  fullName: string;
+  phone: string;
+  email: string;
+  dateOfBirth: string;
+  fatherName: string;
+  motherName: string;
+  address: string;
+
+  // Academic history
+  sscGpa: number;
+  hscGpa: number;
+  boardName: string;
+  passingYear: number;
+
+  // Quota
+  quotaType: QuotaType;
+  supportingDocumentUrl?: string;
+
+  // Program
+  programId: string;
 }
 
-export interface NotificationLog {
-    id: string
-    applicationId?: string
-    studentId: string
-    channel: 'sms' | 'email' | 'push'
-    templateKey: string
-    status: 'pending' | 'sent' | 'failed'
-    sentAt?: string
-    createdAt: string
+export interface SeatReservationResponse {
+  reservationId: string;
+  quotaType: QuotaType;
+  expiresAt: string;
+  paymentDeadlineMinutes: number;
+}
+
+export interface SeatReservationStatus {
+  reservationId: string;
+  status: 'active' | 'expired' | 'completed';
+  expiresAt: string;
+  quotaType: QuotaType;
 }

@@ -1,23 +1,14 @@
-import { axiosInstance } from '@/api/axiosInstance';
-import type { AuthResponse, LoginRequest, RegisterRequest } from '@/api/types/common.types';
-import { normalizeBdPhoneNumber } from '@/utils/phoneValidation';
+import { axiosInstance } from '../axiosInstance';
+import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/common.types';
 
 export const authApi = {
-    login: async (data: LoginRequest): Promise<AuthResponse> => {
-        const normalized = normalizeBdPhoneNumber(data.phone) ?? data.phone;
-        const response = await axiosInstance.post<AuthResponse>('/auth/login', {
-            ...data,
-            phone: normalized,
-        });
-        return response.data;
-    },
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    const response = await axiosInstance.post<AuthResponse>('/auth/login', data);
+    return response.data;
+  },
 
-    register: async (data: RegisterRequest): Promise<AuthResponse> => {
-        const normalized = normalizeBdPhoneNumber(data.phone) ?? data.phone;
-        const response = await axiosInstance.post<AuthResponse>('/auth/register', {
-            ...data,
-            phone: normalized,
-        });
-        return response.data;
-    },
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+    const response = await axiosInstance.post<AuthResponse>('/auth/register', data);
+    return response.data;
+  },
 };

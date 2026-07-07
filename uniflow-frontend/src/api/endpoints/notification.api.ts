@@ -1,9 +1,13 @@
-import { axiosInstance } from '@/api/axiosInstance'
-import type { NotificationLog } from '@/api/types/application.types'
+import { axiosInstance } from '../axiosInstance';
+import type { Notification } from '../types/meritList.types';
 
 export const notificationApi = {
-    getMyNotifications: async (): Promise<NotificationLog[]> => {
-        const response = await axiosInstance.get<NotificationLog[]>('/notifications/my')
-        return response.data
-    },
-}
+  getNotifications: async (): Promise<Notification[]> => {
+    const response = await axiosInstance.get<Notification[]>('/notifications');
+    return response.data;
+  },
+
+  markAsRead: async (notificationId: string): Promise<void> => {
+    await axiosInstance.patch(`/notifications/${notificationId}/read`);
+  },
+};

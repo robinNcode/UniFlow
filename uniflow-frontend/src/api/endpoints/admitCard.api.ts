@@ -1,33 +1,15 @@
-import { axiosInstance } from '@/api/axiosInstance'
-
-export interface AdmitCardReady {
-    status: 'ready'
-    pdfUrl: string
-    rollNumber: string
-    examDate: string
-    examCenter?: string
-}
-
-export interface AdmitCardPending {
-    status: 'PENDING'
-    message: string
-}
-
-export type AdmitCardResponse = AdmitCardReady | AdmitCardPending
+import { axiosInstance } from '../axiosInstance';
+import type { AdmitCardResult } from '../types/meritList.types';
 
 export const admitCardApi = {
-    /**
-     * Returns either ready (200) or pending (202) state.
-     * A 202 is treated as a first-class UI state, not an error.
-     */
-    getAdmitCard: async (applicationId: string): Promise<AdmitCardResponse> => {
-        const response = await axiosInstance.get<AdmitCardResponse>(
-            `/applications/${applicationId}/admit-card`,
-            { validateStatus: (s) => s === 200 || s === 202 },
-        )
-        if (response.status === 202) {
-            return { status: 'PENDING', message: (response.data as AdmitCardPending).message }
-        }
-        return { ...(response.data as AdmitCardReady), status: 'ready' }
-    },
-}
+  getAdmitCard: async (applicationId: string): Promise<AdmitCardResult> => {
+    const response = await axiosInstance.get<AdmitCardResult>(
+      `/applications/${applicationId}/admit-card`,
+      {
+        // The backend returns 202 for pending — Axios treats 2xx as success
+        validateStatus: (status) => status === 200 || status === 202,
+      }
+    );
+    return response.data;
+  },
+};
