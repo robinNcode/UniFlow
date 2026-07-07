@@ -1,5 +1,5 @@
 /*
-SQLyog Ultimate v13.1.1 (64 bit)
+SQLyog Ultimate
 MySQL - 8.0.46-0ubuntu0.24.04.3 : Database - uniflow_v1
 *********************************************************************
 */
@@ -21,8 +21,8 @@ USE `uniflow_v1`;
 DROP TABLE IF EXISTS `admission_cycles`;
 
 CREATE TABLE `admission_cycles` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `program_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `program_id` bigint unsigned NOT NULL,
   `title` varchar(255) NOT NULL,
   `opens_at` datetime NOT NULL,
   `closes_at` datetime NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `admission_cycles` (
   KEY `idx_admission_cycles_active_window` (`opens_at`,`closes_at`),
   CONSTRAINT `fk_admission_cycles_program` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_cycle_dates` CHECK ((`closes_at` > `opens_at`))
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `admission_cycles` */
 
@@ -44,8 +44,8 @@ CREATE TABLE `admission_cycles` (
 DROP TABLE IF EXISTS `admit_cards`;
 
 CREATE TABLE `admit_cards` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `application_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `application_id` bigint unsigned NOT NULL,
   `pdf_path` varchar(500) NOT NULL,
   `roll_number` varchar(50) NOT NULL,
   `exam_date` date DEFAULT NULL,
@@ -55,47 +55,18 @@ CREATE TABLE `admit_cards` (
   UNIQUE KEY `uq_admit_cards_application` (`application_id`),
   UNIQUE KEY `uq_admit_cards_roll_number` (`roll_number`),
   CONSTRAINT `fk_admit_cards_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `admit_cards` */
-
-/*Table structure for table `applications` */
-
-DROP TABLE IF EXISTS `applications`;
-
-CREATE TABLE `applications` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `student_id` char(36) NOT NULL,
-  `cycle_id` char(36) NOT NULL,
-  `quota_id` char(36) NOT NULL,
-  `merit_score` decimal(6,3) NOT NULL,
-  `status` enum('pending','seat_reserved','payment_pending','confirmed','rejected','expired','withdrawn') NOT NULL DEFAULT 'pending',
-  `applied_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `confirmed_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_applications_student_cycle` (`student_id`,`cycle_id`),
-  KEY `idx_applications_cycle_status` (`cycle_id`,`status`),
-  KEY `idx_applications_quota_id` (`quota_id`),
-  KEY `idx_applications_student_id` (`student_id`),
-  KEY `idx_applications_merit_rank` (`quota_id`,`merit_score` DESC),
-  CONSTRAINT `fk_applications_cycle` FOREIGN KEY (`cycle_id`) REFERENCES `admission_cycles` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_applications_quota` FOREIGN KEY (`quota_id`) REFERENCES `seat_quotas` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_applications_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `chk_merit_score_range` CHECK (((`merit_score` >= 0) and (`merit_score` <= 100)))
-);
-
-/*Data for the table `applications` */
 
 /*Table structure for table `notification_logs` */
 
 DROP TABLE IF EXISTS `notification_logs`;
 
 CREATE TABLE `notification_logs` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `application_id` char(36) DEFAULT NULL,
-  `student_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `application_id` bigint unsigned DEFAULT NULL,
+  `student_id` bigint unsigned NOT NULL,
   `channel` enum('sms','email','push') NOT NULL,
   `template_key` varchar(100) NOT NULL,
   `payload` json DEFAULT NULL,
@@ -109,7 +80,7 @@ CREATE TABLE `notification_logs` (
   KEY `idx_notification_logs_status` (`status`),
   CONSTRAINT `fk_notification_logs_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_notification_logs_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `notification_logs` */
 
@@ -118,15 +89,15 @@ CREATE TABLE `notification_logs` (
 DROP TABLE IF EXISTS `outbox_events`;
 
 CREATE TABLE `outbox_events` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `event_type` varchar(100) NOT NULL,
-  `aggregate_id` char(36) NOT NULL,
+  `aggregate_id` bigint unsigned NOT NULL,
   `payload` json NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `processed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_outbox_events_unprocessed` (`created_at`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `outbox_events` */
 
@@ -135,9 +106,9 @@ CREATE TABLE `outbox_events` (
 DROP TABLE IF EXISTS `password_reset_tokens`;
 
 CREATE TABLE `password_reset_tokens` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `subject_type` enum('student','staff') NOT NULL,
-  `subject_id` char(36) NOT NULL,
+  `subject_id` bigint unsigned NOT NULL,
   `token_hash` varchar(255) NOT NULL,
   `expires_at` datetime NOT NULL,
   `used_at` datetime DEFAULT NULL,
@@ -145,7 +116,7 @@ CREATE TABLE `password_reset_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_password_reset_tokens_token_hash` (`token_hash`),
   KEY `idx_password_reset_tokens_subject` (`subject_type`,`subject_id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `password_reset_tokens` */
 
@@ -154,8 +125,8 @@ CREATE TABLE `password_reset_tokens` (
 DROP TABLE IF EXISTS `payments`;
 
 CREATE TABLE `payments` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `application_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `application_id` bigint unsigned NOT NULL,
   `provider` enum('bkash','nagad','rocket','sslcommerz','ssl_card') NOT NULL,
   `provider_txn_id` varchar(100) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
@@ -171,7 +142,7 @@ CREATE TABLE `payments` (
   KEY `idx_payments_status` (`status`),
   CONSTRAINT `fk_payments_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `chk_payments_amount_positive` CHECK ((`amount` > 0))
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `payments` */
 
@@ -180,8 +151,8 @@ CREATE TABLE `payments` (
 DROP TABLE IF EXISTS `programs`;
 
 CREATE TABLE `programs` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `university_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `university_id` bigint unsigned NOT NULL,
   `name` varchar(255) NOT NULL,
   `code` varchar(50) NOT NULL,
   `duration_years` smallint NOT NULL DEFAULT '4',
@@ -192,24 +163,526 @@ CREATE TABLE `programs` (
   UNIQUE KEY `uq_programs_university_code` (`university_id`,`code`),
   KEY `idx_programs_university_id` (`university_id`),
   CONSTRAINT `fk_programs_university` FOREIGN KEY (`university_id`) REFERENCES `universities` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB AUTO_INCREMENT=511 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `programs` */
+
+insert  into `programs`(`id`,`university_id`,`name`,`code`,`duration_years`,`is_active`,`created_at`,`updated_at`) values 
+(1,48,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(2,50,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(3,9,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(4,23,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(5,46,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(6,22,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(7,10,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(8,24,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(9,2,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(10,84,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(11,26,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(12,27,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(13,18,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(14,5,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(15,12,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(16,53,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(17,1,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(18,15,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(19,49,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(20,77,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(21,59,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(22,25,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(23,74,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(24,8,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(25,47,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(26,58,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(27,19,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(28,17,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(29,3,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(30,28,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(31,7,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(32,13,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(33,68,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(34,21,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(35,69,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(36,16,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(37,45,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(38,29,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(39,20,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(40,4,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(41,14,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(42,11,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(43,30,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(44,54,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(45,97,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(46,6,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(47,57,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(48,51,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(49,52,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(50,75,'Bachelor of Science in Computer Science and Engineering','CSE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(51,48,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(52,50,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(53,9,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(54,23,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(55,46,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(56,22,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(57,10,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(58,24,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(59,2,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(60,84,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(61,26,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(62,27,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(63,18,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(64,5,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(65,12,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(66,53,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(67,1,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(68,15,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(69,49,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(70,77,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(71,59,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(72,25,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(73,74,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(74,8,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(75,47,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(76,58,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(77,19,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(78,17,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(79,3,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(80,28,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(81,7,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(82,13,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(83,68,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(84,21,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(85,69,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(86,16,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(87,45,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(88,29,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(89,20,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(90,4,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(91,14,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(92,11,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(93,30,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(94,54,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(95,97,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(96,6,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(97,57,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(98,51,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(99,52,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(100,75,'Bachelor of Business Administration','BBA',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(101,48,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(102,50,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(103,9,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(104,23,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(105,46,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(106,22,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(107,10,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(108,24,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(109,2,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(110,84,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(111,26,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(112,27,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(113,18,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(114,5,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(115,12,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(116,53,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(117,1,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(118,15,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(119,49,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(120,77,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(121,59,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(122,25,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(123,74,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(124,8,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(125,47,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(126,58,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(127,19,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(128,17,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(129,3,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(130,28,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(131,7,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(132,13,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(133,68,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(134,21,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(135,69,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(136,16,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(137,45,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(138,29,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(139,20,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(140,4,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(141,14,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(142,11,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(143,30,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(144,54,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(145,97,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(146,6,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(147,57,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(148,51,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(149,52,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(150,75,'Bachelor of Science in Electrical and Electronic Engineering','EEE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(151,48,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(152,50,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(153,9,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(154,23,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(155,46,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(156,22,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(157,10,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(158,24,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(159,2,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(160,84,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(161,26,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(162,27,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(163,18,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(164,5,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(165,12,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(166,53,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(167,1,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(168,15,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(169,49,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(170,77,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(171,59,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(172,25,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(173,74,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(174,8,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(175,47,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(176,58,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(177,19,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(178,17,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(179,3,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(180,28,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(181,7,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(182,13,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(183,68,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(184,21,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(185,69,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(186,16,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(187,45,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(188,29,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(189,20,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(190,4,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(191,14,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(192,11,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(193,30,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(194,54,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(195,97,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(196,6,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(197,57,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(198,51,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(199,52,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(200,75,'Bachelor of Arts in English','ENG',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(201,48,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(202,50,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(203,9,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(204,23,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(205,46,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(206,22,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(207,10,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(208,24,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(209,2,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(210,84,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(211,26,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(212,27,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(213,18,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(214,5,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(215,12,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(216,53,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(217,1,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(218,15,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(219,49,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(220,77,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(221,59,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(222,25,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(223,74,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(224,8,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(225,47,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(226,58,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(227,19,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(228,17,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(229,3,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(230,28,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(231,7,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(232,13,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(233,68,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(234,21,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(235,69,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(236,16,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(237,45,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(238,29,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(239,20,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(240,4,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(241,14,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(242,11,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(243,30,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(244,54,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(245,97,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(246,6,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(247,57,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(248,51,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(249,52,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(250,75,'Bachelor of Science in Civil Engineering','CE',4,1,'2026-07-07 10:44:32','2026-07-07 10:44:32'),
+(256,48,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(257,50,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(258,9,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(259,23,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(260,46,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(261,22,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(262,10,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(263,24,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(264,2,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(265,84,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(266,26,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(267,27,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(268,18,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(269,5,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(270,12,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(271,53,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(272,1,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(273,15,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(274,49,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(275,77,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(276,59,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(277,25,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(278,74,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(279,8,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(280,47,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(281,58,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(282,19,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(283,17,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(284,3,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(285,28,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(286,7,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(287,13,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(288,68,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(289,21,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(290,69,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(291,16,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(292,45,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(293,29,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(294,20,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(295,4,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(296,14,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(297,11,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(298,30,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(299,54,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(300,97,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(301,6,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(302,57,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(303,51,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(304,52,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(305,75,'Bachelor of Architecture','ARCH',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(306,48,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(307,50,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(308,9,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(309,23,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(310,46,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(311,22,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(312,10,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(313,24,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(314,2,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(315,84,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(316,26,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(317,27,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(318,18,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(319,5,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(320,12,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(321,53,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(322,1,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(323,15,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(324,49,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(325,77,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(326,59,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(327,25,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(328,74,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(329,8,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(330,47,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(331,58,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(332,19,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(333,17,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(334,3,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(335,28,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(336,7,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(337,13,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(338,68,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(339,21,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(340,69,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(341,16,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(342,45,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(343,29,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(344,20,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(345,4,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(346,14,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(347,11,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(348,30,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(349,54,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(350,97,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(351,6,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(352,57,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(353,51,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(354,52,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(355,75,'Bachelor of Pharmacy','PHARM',5,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(356,48,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(357,50,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(358,9,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(359,23,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(360,46,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(361,22,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(362,10,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(363,24,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(364,2,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(365,84,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(366,26,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(367,27,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(368,18,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(369,5,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(370,12,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(371,53,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(372,1,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(373,15,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(374,49,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(375,77,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(376,59,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(377,25,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(378,74,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(379,8,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(380,47,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(381,58,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(382,19,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(383,17,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(384,3,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(385,28,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(386,7,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(387,13,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(388,68,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(389,21,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(390,69,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(391,16,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(392,45,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(393,29,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(394,20,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(395,4,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(396,14,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(397,11,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(398,30,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(399,54,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(400,97,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(401,6,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(402,57,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(403,51,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(404,52,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(405,75,'Bachelor of Science in Mechanical Engineering','ME',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(406,48,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(407,50,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(408,9,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(409,23,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(410,46,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(411,22,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(412,10,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(413,24,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(414,2,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(415,84,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(416,26,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(417,27,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(418,18,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(419,5,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(420,12,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(421,53,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(422,1,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(423,15,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(424,49,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(425,77,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(426,59,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(427,25,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(428,74,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(429,8,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(430,47,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(431,58,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(432,19,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(433,17,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(434,3,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(435,28,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(436,7,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(437,13,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(438,68,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(439,21,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(440,69,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(441,16,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(442,45,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(443,29,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(444,20,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(445,4,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(446,14,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(447,11,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(448,30,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(449,54,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(450,97,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(451,6,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(452,57,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(453,51,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(454,52,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(455,75,'Bachelor of Science in Textile Engineering','TE',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(456,48,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(457,50,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(458,9,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(459,23,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(460,46,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(461,22,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(462,10,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(463,24,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(464,2,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(465,84,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(466,26,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(467,27,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(468,18,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(469,5,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(470,12,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(471,53,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(472,1,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(473,15,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(474,49,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(475,77,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(476,59,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(477,25,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(478,74,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(479,8,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(480,47,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(481,58,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(482,19,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(483,17,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(484,3,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(485,28,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(486,7,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(487,13,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(488,68,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(489,21,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(490,69,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(491,16,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(492,45,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(493,29,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(494,20,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(495,4,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(496,14,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(497,11,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(498,30,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(499,54,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(500,97,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(501,6,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(502,57,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(503,51,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(504,52,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56'),
+(505,75,'Bachelor of Laws','LLB',4,1,'2026-07-07 10:44:56','2026-07-07 10:44:56');
 
 /*Table structure for table `refresh_tokens` */
 
 DROP TABLE IF EXISTS `refresh_tokens`;
 
 CREATE TABLE `refresh_tokens` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `subject_type` enum('student','staff') NOT NULL,
-  `subject_id` char(36) NOT NULL,
+  `subject_id` bigint unsigned NOT NULL,
   `token_hash` varchar(255) NOT NULL,
   `jti` char(36) NOT NULL,
   `issued_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at` datetime NOT NULL,
   `revoked_at` datetime DEFAULT NULL,
-  `replaced_by_token_id` char(36) DEFAULT NULL,
+  `replaced_by_token_id` bigint unsigned DEFAULT NULL,
   `created_by_ip` varchar(45) DEFAULT NULL,
   `user_agent` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -219,7 +692,7 @@ CREATE TABLE `refresh_tokens` (
   KEY `idx_refresh_tokens_subject` (`subject_type`,`subject_id`),
   KEY `idx_refresh_tokens_expiry` (`expires_at`),
   CONSTRAINT `fk_refresh_tokens_replaced_by` FOREIGN KEY (`replaced_by_token_id`) REFERENCES `refresh_tokens` (`id`) ON DELETE SET NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `refresh_tokens` */
 
@@ -228,10 +701,10 @@ CREATE TABLE `refresh_tokens` (
 DROP TABLE IF EXISTS `revoked_access_tokens`;
 
 CREATE TABLE `revoked_access_tokens` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `jti` char(36) NOT NULL,
   `subject_type` enum('student','staff') NOT NULL,
-  `subject_id` char(36) NOT NULL,
+  `subject_id` bigint unsigned NOT NULL,
   `expires_at` datetime NOT NULL,
   `revoked_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `reason` varchar(100) DEFAULT NULL,
@@ -239,7 +712,7 @@ CREATE TABLE `revoked_access_tokens` (
   UNIQUE KEY `uq_revoked_access_tokens_jti` (`jti`),
   KEY `idx_revoked_access_tokens_subject` (`subject_type`,`subject_id`),
   KEY `idx_revoked_access_tokens_expiry` (`expires_at`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `revoked_access_tokens` */
 
@@ -248,7 +721,7 @@ CREATE TABLE `revoked_access_tokens` (
 DROP TABLE IF EXISTS `roles`;
 
 CREATE TABLE `roles` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `permissions` json NOT NULL,
@@ -256,7 +729,7 @@ CREATE TABLE `roles` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_roles_name` (`name`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `roles` */
 
@@ -265,8 +738,8 @@ CREATE TABLE `roles` (
 DROP TABLE IF EXISTS `seat_quotas`;
 
 CREATE TABLE `seat_quotas` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `cycle_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `cycle_id` bigint unsigned NOT NULL,
   `quota_type` enum('general','freedom_fighter','tribal','district_quota','physically_challenged') NOT NULL,
   `total_seats` int NOT NULL,
   `filled_seats` int NOT NULL DEFAULT '0',
@@ -278,7 +751,7 @@ CREATE TABLE `seat_quotas` (
   CONSTRAINT `fk_seat_quotas_cycle` FOREIGN KEY (`cycle_id`) REFERENCES `admission_cycles` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_seat_quotas_non_negative` CHECK (((`total_seats` >= 0) and (`filled_seats` >= 0))),
   CONSTRAINT `chk_seat_quotas_not_overfilled` CHECK ((`filled_seats` <= `total_seats`))
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `seat_quotas` */
 
@@ -287,8 +760,8 @@ CREATE TABLE `seat_quotas` (
 DROP TABLE IF EXISTS `seat_reservations`;
 
 CREATE TABLE `seat_reservations` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `application_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `application_id` bigint unsigned NOT NULL,
   `reserved_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at` datetime NOT NULL,
   `released_at` datetime DEFAULT NULL,
@@ -296,7 +769,7 @@ CREATE TABLE `seat_reservations` (
   UNIQUE KEY `uq_seat_reservations_application` (`application_id`),
   KEY `idx_seat_reservations_expiry` (`expires_at`),
   CONSTRAINT `fk_seat_reservations_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `seat_reservations` */
 
@@ -305,7 +778,7 @@ CREATE TABLE `seat_reservations` (
 DROP TABLE IF EXISTS `students`;
 
 CREATE TABLE `students` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `phone` varchar(20) NOT NULL,
   `email` varchar(255) DEFAULT NULL,
   `full_name` varchar(255) NOT NULL,
@@ -319,7 +792,7 @@ CREATE TABLE `students` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_students_phone` (`phone`),
   KEY `idx_students_email` (`email`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `students` */
 
@@ -328,7 +801,7 @@ CREATE TABLE `students` (
 DROP TABLE IF EXISTS `universities`;
 
 CREATE TABLE `universities` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `short_name` varchar(50) NOT NULL,
   `domain` varchar(100) DEFAULT NULL,
@@ -337,18 +810,122 @@ CREATE TABLE `universities` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_universities_short_name` (`short_name`)
-);
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `universities` */
+
+insert  into `universities`(`id`,`name`,`short_name`,`domain`,`is_active`,`created_at`,`updated_at`) values 
+(1,'University of Dhaka','DU','du.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(2,'Bangladesh University of Engineering and Technology','BUET','buet.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(3,'Jahangirnagar University','JU','juniv.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(4,'University of Rajshahi','RU','ru.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(5,'University of Chittagong','CU','cu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(6,'Shahjalal University of Science and Technology','SUST','sust.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(7,'Khulna University','KU','ku.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(8,'Islamic University','IU','iu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(9,'Bangladesh Agricultural University','BAU','bau.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(10,'Bangabandhu Sheikh Mujibur Rahman Agricultural University','BSMRAU','bsmrau.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(11,'Sher-e-Bangla Agricultural University','SAU','sau.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(12,'Chittagong University of Engineering and Technology','CUET','cuet.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(13,'Khulna University of Engineering and Technology','KUET','kuet.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(14,'Rajshahi University of Engineering and Technology','RUET','ruet.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(15,'Dhaka University of Engineering and Technology','DUET','duet.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(16,'Noakhali Science and Technology University','NSTU','nstu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(17,'Jagannath University','JnU','jnu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(18,'Comilla University','CoU','cou.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(19,'Jatiya Kabi Kazi Nazrul Islam University','JKKNIU','jkkniu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(20,'Patuakhali Science and Technology University','PSTU','pstu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(21,'Mawlana Bhashani Science and Technology University','MBSTU','mbstu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(22,'Begum Rokeya University','BRUR','brur.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(23,'Bangladesh Open University','BOU','bou.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(24,'Bangabandhu Sheikh Mujibur Rahman Science and Technology University','BSMRSTU','bsmrstu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(25,'Hajee Mohammad Danesh Science and Technology University','HSTU','hstu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(26,'Bangladesh University of Professionals','BUP','bup.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(27,'Bangladesh Textiles University','BUTEX','butex.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(28,'Jessore University of Science and Technology','JUST','just.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(29,'National University','NU','nu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(30,'Sylhet Agricultural University','SAU-SYL','sau.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(31,'Barisal University','BU','bu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(32,'Rangamati Science and Technology University','RMSTU','rmstu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(33,'Rabindra University, Bangladesh','RUB','rub.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(34,'Bangamata Sheikh Fojilatunnesa Mujib Science and Technology University','BSFMSTU','bsfmstu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(35,'Sheikh Hasina University','SHU','shu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(36,'Sheikh Fazilatunnesa Mujib University','SFMU','sfmu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(37,'Kurigram Agricultural University','KAU','kau.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(38,'Chandpur Science and Technology University','CSTU','cstu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(39,'Bangabandhu Sheikh Mujibur Rahman Digital University','BDU','bdu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(40,'Bangabandhu Sheikh Mujibur Rahman Aviation and Aerospace University','BSMRAAU','bsmrau.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(41,'Netrokona University','NUK','netrokonauniversity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(42,'Khulna Agricultural University','KAU-KHU','kau.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(43,'Habiganj Agricultural University','HAU','hau.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(44,'University of Barishal','UB','bu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(45,'North South University','NSU','northsouth.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(46,'BRAC University','BRACU','bracu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(47,'Independent University, Bangladesh','IUB','iub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(48,'American International University-Bangladesh','AIUB','aiub.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(49,'East West University','EWU','ewubd.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(50,'Ahsanullah University of Science and Technology','AUST','aust.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(51,'United International University','UIU','uiu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(52,'University of Liberal Arts Bangladesh','ULAB','ulab.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(53,'Daffodil International University','DIU','daffodilvarsity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(54,'Southeast University','SEU','seu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(55,'Stamford University Bangladesh','SUB','stamforduniversity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(56,'Primeasia University','PAU','primeasia.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(57,'University of Asia Pacific','UAP','uap-bd.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(58,'International University of Business Agriculture and Technology','IUBAT','iubat.edu',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(59,'Green University of Bangladesh','GUB','green.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(60,'Northern University Bangladesh','NUB','nub.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(61,'World University of Bangladesh','WUB','wub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(62,'State University of Bangladesh','SUBD','sub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(63,'Eastern University','EU','easternuni.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(64,'Bangladesh University','BU-PRIVATE','bu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(65,'ASA University Bangladesh','ASAUB','asaub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(66,'Atish Dipankar University of Science and Technology','ADUST','adust.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(67,'University of Information Technology and Sciences','UITS','uits.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(68,'Leading University','LU','lus.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(69,'Metropolitan University','MU','metrouni.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(70,'Sylhet International University','SIU','siu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(71,'Southern University Bangladesh','SUB-CTG','southern.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(72,'Premier University','PU','puc.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(73,'Port City International University','PCIU','portcity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(74,'International Islamic University Chittagong','IIUC','iiuc.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(75,'University of Science and Technology Chittagong','USTC','ustc.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(76,'BGC Trust University Bangladesh','BGCTUB','bgctub.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(77,'Gono University','GU','gonouniversity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(78,'Dhaka International University','DIU-PRIVATE','diu.ac',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(79,'City University','CU-PRIVATE','cityuniversity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(80,'Prime University','PU-DHAKA','primeuniversity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(81,'Canadian University of Bangladesh','CUB','cub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(82,'European University of Bangladesh','EUB','eub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(83,'Victoria University of Bangladesh','VUB','vu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(84,'BGMEA University of Fashion and Technology','BUFT','buft.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(85,'Shanto-Mariam University of Creative Technology','SMUCT','smuct.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(86,'Northern University of Business and Technology Khulna','NUBTK','nubtk.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(87,'North Bengal International University','NBIU','nbiu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(88,'Varendra University','VU-RAJSHAHI','vu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(89,'North Western University','NWU','nwu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(90,'Rajshahi Science and Technology University','RSTU','rstu.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(91,'Britannia University','BrU','britannia.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(92,'Exim Bank Agricultural University Bangladesh','EBAUB','ebaub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(93,'CCN University of Science and Technology','CCNUST','ccn.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(94,'Z H Sikder University of Science and Technology','ZHSUST','zhsust.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(95,'First Capital University of Bangladesh','FCUB','fcub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(96,'German University Bangladesh','GUBD','gub.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(97,'Sonargaon University','SU','su.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(98,'The Millennium University','TMU','themillenniumuniversity.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(99,'Bangladesh Army University of Engineering and Technology','BAUET','bauet.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(100,'Bangladesh Army International University of Science and Technology','BAIUST','baiust.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(101,'Bangladesh Army University of Science and Technology','BAUST','baust.edu.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09'),
+(102,'Cox\'s Bazar International University','CBIU','cbiu.ac.bd',1,'2026-07-07 10:44:09','2026-07-07 10:44:09');
 
 /*Table structure for table `users` */
 
 DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
-  `id` char(36) NOT NULL DEFAULT (uuid()),
-  `university_id` char(36) DEFAULT NULL,
-  `role_id` char(36) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `university_id` bigint unsigned DEFAULT NULL,
+  `role_id` bigint unsigned NOT NULL,
   `full_name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
@@ -363,7 +940,7 @@ CREATE TABLE `users` (
   KEY `idx_staff_users_role_id` (`role_id`),
   CONSTRAINT `fk_staff_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `fk_staff_users_university` FOREIGN KEY (`university_id`) REFERENCES `universities` (`id`) ON DELETE SET NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `users` */
 
