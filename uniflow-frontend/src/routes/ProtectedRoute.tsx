@@ -1,14 +1,37 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useAuthStore } from '@/stores/authStore'
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
+import type { ReactNode } from 'react';
 
-export function ProtectedRoute() {
-    const { token, student } = useAuthStore()
-    const isAuthenticated = Boolean(token && student)
+interface ProtectedRouteProps {
+    children?: ReactNode;
+    requireRole?: 'student' | 'admin';
+}
+
+/**
+ * ProtectedRoute — redirects unauthenticated users to /login
+ * with the current path preserved as a returnTo query param
+ * so they're sent back after successful authentication.
+ * If requireRole is provided, ensures the user has that role.
+ */
+export function ProtectedRoute({ children, requireRole }: ProtectedRouteProps) {
+    const { isAuthenticated, user } = useAuthStore();
+    const location = useLocation();
 
     if (!isAuthenticated) {
-        const returnTo = encodeURIComponent(window.location.pathname + window.location.search)
-        return <Navigate to={`/login?returnTo=${returnTo}`} replace />
+        return (
+            <Navigate
+                to={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`}
+                replace
+            />
+        );
     }
 
-    return <Outlet />
+    if (requireRole && user?.role !== requireRole) {
+        // If authenticated but wrong role, send them to their respective dashboard
+        return <Navigate to={user?.role === 'admin' ? '/admin' : '/dashboard'} replace />;
+    }
+
+    return children ? <>{children}</> : <Outlet />;
 }
+
+export default ProtectedRoute;

@@ -35,3 +35,30 @@ export interface PaginatedResponse<T> {
     page: number
     pageSize: number
 }
+
+/** Authenticated user profile */
+export interface UserProfile {
+    id: string
+    fullName: string
+    phone: string
+    role: 'student' | 'admin'
+}
+
+/** Auth API response */
+export interface AuthResponse {
+    token: string
+    user: UserProfile
+}
+
+/** Login request payload */
+export interface LoginRequest {
+    phone: string
+    password: string
+}
+
+/** Register request payload */
+export interface RegisterRequest {
+    fullName: string
+    phone: string
+    password: string
+}
